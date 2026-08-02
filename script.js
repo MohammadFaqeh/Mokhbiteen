@@ -25,6 +25,11 @@
   setText("heroVerseRef", meta.verseRef);
   setText("heroTitle", meta.heroTitle);
   setText("heroDesc", meta.heroDesc);
+  setText("statsSectionSub", `أبرز الأرقام التي تلخص مسيرة المجموعة خلال ${meta.monthLabel}`);
+  setText("podiumSectionTitle", `نجوم ${meta.projectName} — ${meta.monthLabel}`);
+  setText("journeySectionTitle", `رحلة ${meta.monthLabel}`);
+  setText("journeySectionSub", `${days.length} محطات مباركة، في كل واحدة منها جهد وأثر ومتابعة`);
+  setText("journeyActionText", `رحلة ${meta.monthLabel}`);
   setText("studentsSectionSub", `${students.length} طالبًا، وكل واحد منهم له بصمته وجهده الخاص هذا الشهر`);
   setText("footerVerse", `﴿ ${meta.verse} ﴾`);
   setText("footerProjectLine", `${meta.projectName} — ${meta.heroTitle}`);
@@ -171,7 +176,7 @@
       logging: false
     }).then((canvas) => {
       const link = document.createElement("a");
-      link.download = "لوحة-شرف-المخبتين-شهر7.png";
+      link.download = `لوحة-شرف-المخبتين-${meta.monthLabel.replace(/\s+/g, "-")}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
       showToast("تم حفظ الصورة بنجاح");
@@ -335,9 +340,10 @@
   function openDayModal(dayId) {
     const d = days.find((x) => x.id === dayId);
     if (!d) return;
+    const dayIndex = days.indexOf(d);
 
     const rows = students.map((st) => {
-      const dd = st.days.find((x) => x.date === d.date);
+      const dd = st.days[dayIndex];
       return { name: st.name, ...dd };
     }).sort((a, b) => b.dayAverage - a.dayAverage);
 

@@ -86,6 +86,7 @@
   // تحميل نسخة العمل: من التخزين المحلي إن وجدت، وإلا من data.js الأصلي
   let workingData = loadDraft() || JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
   let activeDayIndex = 0;
+  if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
 
   function loadDraft() {
     try {
@@ -111,6 +112,7 @@
     ["heroTitle", "عنوان لوحة الشرف"],
     ["heroDesc", "الوصف القصير"],
     ["monthLabel", "اسم الشهر"],
+    ["year", "السنة"],
     ["supervisor", "اسم المشرف"],
     ["supervisorTitle", "صفة المشرف"]
   ];
@@ -139,7 +141,7 @@
     workingData.days.forEach((d, i) => {
       const btn = document.createElement("button");
       btn.className = "admin-tab" + (i === activeDayIndex ? " active" : "");
-      btn.textContent = `اللقاء ${d.meetingNumber} (${d.date})`;
+      btn.textContent = `اللقاء ${d.meetingNumber} (${d.date || "بدون تاريخ"})`;
       btn.addEventListener("click", () => { activeDayIndex = i; renderDayTabs(); renderStudentsTable(); });
       dayTabs.appendChild(btn);
     });
@@ -197,6 +199,7 @@
     const finals = workingData.students.map((s) => s.final);
     const attendances = workingData.students.map((s) => s.attendance);
     workingData.stats.studentsCount = totalStudents;
+    workingData.stats.daysCount = workingData.days.length;
     workingData.stats.groupAverage = round1(finals.reduce((a, b) => a + b, 0) / totalStudents);
     workingData.stats.topAverage = round1(Math.max(...finals));
     workingData.stats.attendanceRate = round1(attendances.reduce((a, b) => a + b, 0) / totalStudents);
@@ -215,6 +218,138 @@
   }
   function round1(v) { return Math.round(v * 10) / 10; }
   function escapeAttr(s) { return String(s).replace(/"/g, "&quot;"); }
+
+  /* ---------------------------------------------------------------------
+     إدارة الشهر واللقاءات
+  --------------------------------------------------------------------- */
+  const meetingsManager = document.getElementById("meetingsManager");
+  const newMonthLabel = document.getElementById("newMonthLabel");
+  const newMonthYear = document.getElementById("newMonthYear");
+  const newMeetingsCount = document.getElementById("newMeetingsCount");
+  newMonthYear.value = workingData.meta.year;
+
+  function pad2(value) { return String(value).padStart(2, "0"); }
+  function toCalendarDate(displayDate) {
+    if (!displayDate) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(displayDate)) return displayDate;
+    const parts = String(displayDate).split("/");
+    if (parts.length !== 2) return "";
+    return `${workingData.meta.year}-${pad2(parts[1])}-${pad2(parts[0])}`;
+  }
+  function toDisplayDate(calendarDate) {
+    if (!calendarDate) return "";
+    const [year, month, day] = calendarDate.split("-");
+    if (year) workingData.meta.year = year;
+    return `${day}/${month}`;
+  }
+  function emptyStudentDay(date) {
+    return { date: date || "", attendance: 0, memorization: 0, revision: 0, worship: 0, evaluation: 0, dayAverage: 0 };
+  }
+  function emptyMeeting(index) {
+    return {
+      id: `meeting-${Date.now()}-${index}`,
+      date: "",
+      meetingNumber: index + 1,
+      groupAverage: 0,
+      presentCount: 0,
+      totalCount: workingData.students.length,
+      achievement: "يُضاف إنجاز هذا اللقاء",
+      nextRequired: "يُضاف المطلوب للقاء القادم",
+      note: "",
+      motivation: ""
+    };
+  }
+  function renumberMeetings() {
+    workingData.days.forEach((day, index) => { day.meetingNumber = index + 1; });
+  }
+  function renderMeetingsManager() {
+    meetingsManager.innerHTML = workingData.days.map((day, index) => `
+      <div class="meeting-manage-row">
+        <strong>اللقاء ${index + 1}</strong>
+        <div class="meta-field">
+          <label>تاريخ اللقاء</label>
+          <input type="date" data-meeting-date="${index}" value="${toCalendarDate(day.date)}">
+        </div>
+        <button class="row-del" data-delete-meeting="${index}" title="حذف اللقاء"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("");
+  }
+
+  meetingsManager.addEventListener("change", (e) => {
+    if (e.target.dataset.meetingDate === undefined) return;
+    const index = Number(e.target.dataset.meetingDate);
+    const displayDate = toDisplayDate(e.target.value);
+    workingData.days[index].date = displayDate;
+    workingData.students.forEach((student) => {
+      if (student.days[index]) student.days[index].date = displayDate;
+    });
+    recalcAllAndRank();
+    saveDraft();
+    renderMeta();
+    renderDayTabs();
+    renderStudentsTable();
+    renderAchievements();
+    showToast("تم تحديث تاريخ اللقاء");
+  });
+
+  meetingsManager.addEventListener("click", (e) => {
+    const button = e.target.closest("[data-delete-meeting]");
+    if (!button) return;
+    if (workingData.days.length <= 1) {
+      showToast("يجب أن يبقى لقاء واحد على الأقل");
+      return;
+    }
+    const index = Number(button.dataset.deleteMeeting);
+    if (!confirm(`هل تريد حذف اللقاء ${index + 1} ودرجاته؟`)) return;
+    workingData.days.splice(index, 1);
+    workingData.students.forEach((student) => student.days.splice(index, 1));
+    renumberMeetings();
+    activeDayIndex = Math.min(activeDayIndex, workingData.days.length - 1);
+    recalcAllAndRank();
+    saveDraft();
+    renderAll();
+    showToast("تم حذف اللقاء");
+  });
+
+  document.getElementById("addMeetingBtn").addEventListener("click", () => {
+    if (workingData.days.length >= 12) {
+      showToast("الحد الأقصى 12 لقاء");
+      return;
+    }
+    workingData.days.push(emptyMeeting(workingData.days.length));
+    workingData.students.forEach((student) => student.days.push(emptyStudentDay("")));
+    renumberMeetings();
+    recalcAllAndRank();
+    saveDraft();
+    renderAll();
+    showToast("تمت إضافة لقاء جديد — اختر تاريخه من التقويم");
+  });
+
+  document.getElementById("startNewMonthBtn").addEventListener("click", () => {
+    const label = newMonthLabel.value.trim();
+    const year = String(newMonthYear.value || "").trim();
+    const count = Math.max(1, Math.min(12, Number(newMeetingsCount.value) || 5));
+    if (!label) {
+      showToast("اكتب اسم الشهر الجديد أولًا");
+      newMonthLabel.focus();
+      return;
+    }
+    if (!confirm(`سيتم تنزيل نسخة احتياطية ثم بدء ${label} وتصفير جميع النتائج. هل تريد المتابعة؟`)) return;
+    downloadText(buildFileText(), `نسخة-احتياطية-${workingData.meta.monthLabel.replace(/\s+/g, "-")}.js`);
+    workingData.meta.monthLabel = label;
+    workingData.meta.year = year || String(new Date().getFullYear());
+    newMonthYear.value = workingData.meta.year;
+    workingData.meta.heroTitle = `لوحة شرف ${label}`;
+    workingData.days = Array.from({ length: count }, (_, index) => emptyMeeting(index));
+    workingData.students.forEach((student) => {
+      student.days = workingData.days.map(() => emptyStudentDay(""));
+    });
+    activeDayIndex = 0;
+    recalcAllAndRank();
+    saveDraft();
+    newMonthLabel.value = "";
+    renderAll();
+    showToast(`تم بدء ${label} — اختر تواريخ اللقاءات من التقويم`);
+  });
 
   function renderStudentsTable() {
     const dayIdx = activeDayIndex;
@@ -296,7 +431,7 @@
       box.style.paddingBottom = "18px";
       box.style.borderBottom = "1px solid rgba(31,107,82,.1)";
       box.innerHTML = `
-        <h3 style="margin:0 0 10px;color:var(--navy-deep);font-size:1rem">اللقاء ${d.meetingNumber} — ${d.date}</h3>
+        <h3 style="margin:0 0 10px;color:var(--navy-deep);font-size:1rem">اللقاء ${d.meetingNumber} — ${d.date || "بدون تاريخ"}</h3>
         <div class="day-field-grid">
           <div class="meta-field"><label>الإنجاز</label><textarea rows="2" data-day="${i}" data-field="achievement">${d.achievement}</textarea></div>
           <div class="meta-field"><label>المطلوب للقاء القادم</label><textarea rows="2" data-day="${i}" data-field="nextRequired">${d.nextRequired}</textarea></div>
@@ -318,17 +453,22 @@
      التصدير
   --------------------------------------------------------------------- */
   function buildFileText() {
-    return "// بيانات مشروع المخبتين القرآني - شهر 7\n// يمكن تعديل أي قيمة هنا مباشرة\nconst MOKHBITEEN_DATA = " +
+    return `// بيانات ${workingData.meta.projectName} - ${workingData.meta.monthLabel}\n// يمكن تعديل أي قيمة هنا مباشرة\nconst MOKHBITEEN_DATA = ` +
       JSON.stringify(workingData, null, 2) + ";\n";
   }
 
-  document.getElementById("exportBtn").addEventListener("click", () => {
-    const text = buildFileText();
+  function downloadText(text, filename) {
     const blob = new Blob([text], { type: "text/javascript;charset=utf-8" });
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "data.js";
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = filename;
     link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    downloadText(buildFileText(), "data.js");
     showToast("تم تنزيل data.js — استبدل به الملف القديم");
   });
 
@@ -342,7 +482,9 @@
     if (!confirm("سيتم استرجاع البيانات الأصلية والتخلي عن كل التعديلات المحلية. هل أنت متأكد؟")) return;
     localStorage.removeItem(STORAGE_KEY);
     workingData = JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
+    if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
     activeDayIndex = 0;
+    newMonthYear.value = workingData.meta.year;
     renderAll();
     showToast("تم استرجاع البيانات الأصلية");
   });
@@ -352,6 +494,7 @@
   --------------------------------------------------------------------- */
   function renderAll() {
     renderMeta();
+    renderMeetingsManager();
     renderDayTabs();
     renderStudentsTable();
     renderAchievements();

@@ -59,6 +59,14 @@
     font-family:inherit; background:var(--cream-soft); color:var(--ink); font-size:.88rem;
   }
   .day-field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:14px; }
+  .month-setup-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; align-items:end; }
+  .meetings-manager{ display:grid; gap:10px; margin-top:18px; }
+  .meeting-manage-row{
+    display:grid; grid-template-columns:90px minmax(180px,1fr) 44px; gap:10px; align-items:end;
+    padding:12px; border-radius:12px; background:var(--cream-soft);
+  }
+  .meeting-manage-row strong{ align-self:center; color:var(--navy-deep); }
+  .admin-warning{ color:#8a4d27; font-size:.82rem; margin:10px 0 0; }
   pre#exportPreview{
     max-height:280px; overflow:auto; background:var(--navy-deep); color:#dce8e0;
     padding:16px; border-radius:12px; font-size:.72rem; display:none;
@@ -90,6 +98,10 @@
   .lock-box button{ width:100%; }
   .lock-error{ color:#b8563f; font-size:.82rem; margin-top:12px; min-height:18px; }
   .admin-hidden{ display:none !important; }
+  @media(max-width:600px){
+    .meeting-manage-row{ grid-template-columns:72px minmax(130px,1fr) 36px; padding:10px 6px; }
+    .month-setup-grid{ grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body>
@@ -129,6 +141,31 @@
   <div class="admin-card">
     <h2><i class="fa-solid fa-gear"></i> بيانات عامة عن المشروع</h2>
     <div class="meta-grid" id="metaFields"></div>
+  </div>
+
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-calendar-plus"></i> إدارة الشهر واللقاءات</h2>
+    <div class="month-setup-grid">
+      <div class="meta-field">
+        <label>اسم الشهر الجديد</label>
+        <input type="text" id="newMonthLabel" placeholder="مثال: شهر 8">
+      </div>
+      <div class="meta-field">
+        <label>السنة</label>
+        <input type="number" id="newMonthYear" min="2020" max="2100">
+      </div>
+      <div class="meta-field">
+        <label>عدد اللقاءات</label>
+        <input type="number" id="newMeetingsCount" min="1" max="12" value="5">
+      </div>
+      <button class="btn btn-gold btn-sm" id="startNewMonthBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> بدء شهر جديد</button>
+    </div>
+    <p class="admin-warning"><i class="fa-solid fa-triangle-exclamation"></i> سيُنزل النظام نسخة احتياطية أولًا، ثم يحتفظ بأسماء الطلاب وصورهم ويصفّر نتائجهم للشهر الجديد.</p>
+
+    <div class="meetings-manager" id="meetingsManager"></div>
+    <div class="admin-actions">
+      <button class="btn btn-teal btn-sm" id="addMeetingBtn"><i class="fa-solid fa-plus"></i> إضافة لقاء</button>
+    </div>
   </div>
 
   <div class="admin-card">
