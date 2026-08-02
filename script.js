@@ -238,22 +238,6 @@
   });
 
   /* ---------------------------------------------------------------------
-     الإنجازات
-  --------------------------------------------------------------------- */
-  const achGrid = document.getElementById("achGrid");
-  days.forEach((d) => {
-    const card = document.createElement("div");
-    card.className = "ach-card reveal";
-    card.innerHTML = `
-      <div class="ach-date"><i class="fa-solid fa-flag"></i> اللقاء ${d.meetingNumber} — ${d.date}</div>
-      <div class="ach-row"><b>الإنجاز:</b> ${d.achievement}</div>
-      <div class="ach-row"><b>المطلوب للقاء القادم:</b> ${d.nextRequired}</div>
-      <div class="ach-row"><b>ملاحظة:</b> ${d.note}</div>
-      <div class="ach-quote">"${d.motivation}"</div>`;
-    achGrid.appendChild(card);
-  });
-
-  /* ---------------------------------------------------------------------
      نوافذ Modal — تفاصيل الطالب
   --------------------------------------------------------------------- */
   const studentModal = document.getElementById("studentModal");
