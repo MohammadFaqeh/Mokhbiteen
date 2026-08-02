@@ -1,0 +1,789 @@
+/* ==========================================================================
+   مشروع المخبتين القرآني — لوحة شرف شهر 7
+   نظام التصميم: أخضر-كحلي داكن مستخرج من الشعار + ذهبي + بيج فاتح
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Aref+Ruqaa:wght@400;700&display=swap');
+
+:root{
+  /* ألوان مستخرجة من الشعار + الطلب */
+  --navy-deep:      #16232c;
+  --navy:            #1e3038;
+  --teal:            #2f5c56;
+  --teal-light:      #3f7d6f;
+  --emerald:         #1f6b52;
+  --emerald-light:   #2f9873;
+  --gold:            #c9a24b;
+  --gold-light:      #e6c878;
+  --gold-soft:       #f0dca6;
+  --cream:           #f6efdf;
+  --cream-soft:      #faf6ec;
+  --paper:           #fdfbf5;
+  --ink:             #1b2a2c;
+  --ink-soft:        #4c5c56;
+  --silver:          #b9c2c8;
+  --bronze:          #b5754a;
+
+  --shadow-soft: 0 10px 30px -12px rgba(20, 40, 35, .35);
+  --shadow-deep: 0 25px 60px -20px rgba(10, 20, 20, .55);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+
+  --font-display: 'Aref Ruqaa', 'Cairo', serif;
+  --font-body: 'Cairo', sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--cream-soft);
+  color:var(--ink);
+  direction:rtl;
+  overflow-x:hidden;
+  line-height:1.7;
+}
+
+img{ max-width:100%; display:block; }
+button{ font-family:inherit; cursor:pointer; }
+a{ color:inherit; text-decoration:none; }
+
+::selection{ background:var(--gold-soft); color:var(--navy-deep); }
+
+/* خلفية زخرفية إسلامية هندسية خفيفة */
+.pattern-bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  opacity:.05;
+  pointer-events:none;
+  background-image:
+    radial-gradient(circle at 10% 20%, var(--emerald) 0, transparent 45%),
+    radial-gradient(circle at 90% 80%, var(--gold) 0, transparent 45%);
+}
+
+.geo-pattern{
+  position:absolute;
+  inset:0;
+  opacity:.08;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23c9a24b' stroke-width='1'%3E%3Cpath d='M60 0 L120 60 L60 120 L0 60 Z'/%3E%3Ccircle cx='60' cy='60' r='42'/%3E%3Cpath d='M60 18 L102 60 L60 102 L18 60 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:140px 140px;
+}
+
+/* ===================== شريط التمرير ===================== */
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background:var(--cream); }
+::-webkit-scrollbar-thumb{ background:var(--teal); border-radius:10px; }
+
+/* ===================== شريط التنقل ===================== */
+.navbar{
+  position:fixed;
+  top:0; right:0; left:0;
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 5%;
+  background:rgba(22,35,44,.0);
+  transition:background .4s ease, box-shadow .4s ease, padding .4s ease;
+}
+.navbar.scrolled{
+  background:rgba(22,35,44,.92);
+  backdrop-filter:blur(10px);
+  box-shadow:var(--shadow-soft);
+  padding:8px 5%;
+}
+.nav-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--cream);
+  font-weight:800;
+}
+.nav-brand img{ height:42px; width:42px; object-fit:contain; filter:drop-shadow(0 0 6px rgba(201,162,75,.4)); }
+.nav-brand span{ font-family:var(--font-display); font-size:1.15rem; }
+.nav-links{ display:flex; gap:28px; list-style:none; margin:0; padding:0; }
+.nav-links a{
+  color:var(--cream);
+  font-size:.95rem;
+  font-weight:600;
+  position:relative;
+  padding:6px 0;
+}
+.nav-links a::after{
+  content:'';
+  position:absolute; right:0; bottom:0;
+  width:0; height:2px;
+  background:var(--gold);
+  transition:width .3s ease;
+}
+.nav-links a:hover::after{ width:100%; }
+.nav-toggle{ display:none; background:none; border:none; color:var(--cream); font-size:1.5rem; }
+
+/* ===================== القسم الافتتاحي ===================== */
+.hero{
+  position:relative;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:120px 5% 80px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(201,162,75,.10), transparent 60%),
+    linear-gradient(160deg, var(--navy-deep) 0%, var(--navy) 45%, var(--teal) 100%);
+  color:var(--cream);
+  overflow:hidden;
+}
+.hero .geo-pattern{ opacity:.06; }
+
+.hero-glow{
+  position:absolute;
+  top:8%;
+  right:50%;
+  transform:translateX(50%);
+  width:520px; height:520px;
+  background:radial-gradient(circle, rgba(230,200,120,.35) 0%, transparent 68%);
+  filter:blur(10px);
+  pointer-events:none;
+  animation:pulseGlow 6s ease-in-out infinite;
+}
+@keyframes pulseGlow{
+  0%,100%{ opacity:.55; transform:translateX(50%) scale(1); }
+  50%{ opacity:.9; transform:translateX(50%) scale(1.08); }
+}
+
+.hero-logo-wrap{
+  position:relative;
+  width:150px; height:150px;
+  margin:0 auto 22px;
+  opacity:0;
+  animation:fadeUp 1s ease .1s forwards;
+}
+.hero-logo-ring{
+  position:absolute; inset:-14px;
+  border-radius:50%;
+  border:1px solid rgba(201,162,75,.5);
+  animation:spinSlow 26s linear infinite;
+}
+.hero-logo-ring::before,.hero-logo-ring::after{
+  content:'';
+  position:absolute;
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--gold-light);
+  top:-3px; right:calc(50% - 3px);
+  box-shadow:0 0 10px 2px rgba(230,200,120,.7);
+}
+.hero-logo-ring::after{ top:auto; bottom:-3px; }
+@keyframes spinSlow{ to{ transform:rotate(360deg); } }
+.hero-logo-wrap img{
+  width:100%; height:100%;
+  object-fit:contain;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(246,239,223,.08), transparent 70%);
+}
+
+.hero-eyebrow{
+  opacity:0;
+  animation:fadeUp .9s ease .25s forwards;
+  color:var(--gold-light);
+  letter-spacing:.08em;
+  font-weight:700;
+  font-size:.85rem;
+  margin-bottom:14px;
+}
+
+.hero-verse{
+  opacity:0;
+  animation:fadeUp 1s ease .38s forwards;
+  font-family:var(--font-display);
+  font-size:clamp(1.8rem, 5vw, 3.2rem);
+  font-weight:700;
+  color:var(--gold-light);
+  margin:0 0 6px;
+  text-shadow:0 2px 20px rgba(201,162,75,.25);
+}
+.hero-verse-ref{
+  opacity:0;
+  animation:fadeUp 1s ease .5s forwards;
+  font-size:.85rem;
+  color:rgba(246,239,223,.65);
+  margin-bottom:34px;
+}
+
+.hero-title{
+  opacity:0;
+  animation:fadeUp 1s ease .62s forwards;
+  font-family:var(--font-display);
+  font-size:clamp(2.1rem, 6vw, 3.6rem);
+  font-weight:700;
+  margin:0 0 14px;
+  color:var(--cream);
+}
+.hero-desc{
+  opacity:0;
+  animation:fadeUp 1s ease .74s forwards;
+  max-width:560px;
+  margin:0 auto 38px;
+  color:rgba(246,239,223,.8);
+  font-size:1.05rem;
+}
+
+.hero-actions{
+  opacity:0;
+  animation:fadeUp 1s ease .86s forwards;
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 30px;
+  border-radius:50px;
+  font-weight:700;
+  font-size:.95rem;
+  border:none;
+  transition:transform .3s ease, box-shadow .3s ease, background .3s ease;
+}
+.btn-gold{
+  background:linear-gradient(135deg, var(--gold-light), var(--gold));
+  color:var(--navy-deep);
+  box-shadow:0 10px 25px -8px rgba(201,162,75,.55);
+}
+.btn-gold:hover{ transform:translateY(-3px); box-shadow:0 16px 34px -10px rgba(201,162,75,.7); }
+.btn-outline{
+  background:transparent;
+  color:var(--cream);
+  border:1.5px solid rgba(246,239,223,.4);
+}
+.btn-outline:hover{ background:rgba(246,239,223,.1); border-color:var(--gold-light); transform:translateY(-3px); }
+
+.scroll-hint{
+  position:absolute; bottom:28px; right:50%; transform:translateX(50%);
+  color:rgba(246,239,223,.6);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  font-size:.75rem;
+  opacity:0;
+  animation:fadeUp 1s ease 1.05s forwards, bounce 2.4s ease 2s infinite;
+}
+@keyframes bounce{ 0%,100%{ transform:translate(50%,0);} 50%{ transform:translate(50%,8px);} }
+
+@keyframes fadeUp{
+  from{ opacity:0; transform:translateY(22px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* ===================== أقسام عامة ===================== */
+section{ position:relative; padding:100px 5%; }
+.section-inner{ max-width:1200px; margin:0 auto; }
+
+.section-head{ text-align:center; margin-bottom:56px; }
+.section-eyebrow{
+  display:inline-block;
+  color:var(--emerald);
+  font-weight:700;
+  font-size:.8rem;
+  letter-spacing:.08em;
+  background:rgba(31,107,82,.08);
+  padding:6px 18px;
+  border-radius:50px;
+  margin-bottom:14px;
+}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(1.8rem, 4vw, 2.6rem);
+  color:var(--navy-deep);
+  margin:0 0 10px;
+}
+.section-sub{ color:var(--ink-soft); max-width:560px; margin:0 auto; }
+
+.reveal{ opacity:0; transform:translateY(30px); transition:opacity .8s ease, transform .8s ease; }
+.reveal.in-view{ opacity:1; transform:translateY(0); }
+
+/* ===================== إحصائيات ===================== */
+.stats-section{ background:var(--paper); }
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
+  gap:22px;
+}
+.stat-card{
+  background:linear-gradient(160deg, var(--navy) 0%, var(--teal) 120%);
+  border-radius:var(--radius-lg);
+  padding:30px 22px;
+  text-align:center;
+  color:var(--cream);
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow-soft);
+  transition:transform .35s ease, box-shadow .35s ease;
+}
+.stat-card::before{
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 100% 0%, rgba(201,162,75,.25), transparent 60%);
+}
+.stat-card:hover{ transform:translateY(-8px); box-shadow:var(--shadow-deep); }
+.stat-icon{ font-size:1.6rem; color:var(--gold-light); margin-bottom:10px; }
+.stat-value{
+  font-size:2.3rem;
+  font-weight:800;
+  color:var(--gold-light);
+  font-family:var(--font-display);
+}
+.stat-label{ font-size:.9rem; color:rgba(246,239,223,.8); margin-top:6px; }
+
+/* ===================== منصة التتويج ===================== */
+.podium-section{
+  background:linear-gradient(180deg, var(--paper) 0%, var(--cream) 100%);
+}
+.podium-wrap{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:clamp(10px, 3vw, 34px);
+  margin:70px auto 40px;
+  max-width:900px;
+  flex-wrap:wrap;
+}
+.podium-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:200px;
+  opacity:0;
+  transform:translateY(50px);
+  transition:opacity .8s ease, transform .8s ease;
+}
+.podium-card.in-view{ opacity:1; transform:translateY(0); }
+.podium-rank-badge{
+  width:78px; height:78px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display);
+  font-size:1.9rem;
+  font-weight:800;
+  color:var(--navy-deep);
+  margin-bottom:-30px;
+  position:relative;
+  z-index:3;
+  border:4px solid var(--paper);
+  box-shadow:0 8px 18px -6px rgba(0,0,0,.3);
+}
+.rank-1 .podium-rank-badge{ background:linear-gradient(135deg, var(--gold-light), var(--gold)); width:92px; height:92px; font-size:2.3rem; }
+.rank-2 .podium-rank-badge{ background:linear-gradient(135deg, #dfe6ea, var(--silver)); }
+.rank-3 .podium-rank-badge{ background:linear-gradient(135deg, #d99a68, var(--bronze)); color:var(--paper); }
+
+.podium-avatar-wrap{ position:relative; margin-bottom:14px; }
+.podium-crown{
+  position:absolute; top:-38px; right:50%; transform:translateX(50%);
+  font-size:1.8rem; color:var(--gold);
+  filter:drop-shadow(0 4px 6px rgba(201,162,75,.5));
+  animation:floatCrown 3s ease-in-out infinite;
+}
+@keyframes floatCrown{ 0%,100%{ transform:translateX(50%) translateY(0);} 50%{ transform:translateX(50%) translateY(-6px);} }
+
+.podium-avatar{
+  width:96px; height:96px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display);
+  font-size:1.9rem;
+  font-weight:800;
+  color:var(--paper);
+  background:linear-gradient(150deg, var(--teal), var(--navy));
+  border:4px solid var(--gold-light);
+  box-shadow:0 10px 24px -8px rgba(0,0,0,.35);
+  object-fit:cover;
+}
+.rank-1 .podium-avatar{ width:120px; height:120px; font-size:2.3rem; border-color:var(--gold); box-shadow:0 0 0 6px rgba(201,162,75,.18), 0 14px 30px -10px rgba(0,0,0,.4); }
+
+.podium-name{ font-weight:800; color:var(--navy-deep); text-align:center; margin-bottom:4px; }
+.podium-score{
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:1.4rem;
+  color:var(--emerald);
+  margin-bottom:14px;
+}
+.podium-base{
+  width:100%;
+  border-radius:14px 14px 4px 4px;
+  background:linear-gradient(160deg, var(--navy) 0%, var(--teal) 100%);
+  color:var(--cream);
+  text-align:center;
+  padding:14px 10px 18px;
+  font-weight:700;
+  font-size:.85rem;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+}
+.rank-1 .podium-base{ height:150px; background:linear-gradient(160deg, #22394a, var(--emerald)); }
+.rank-2 .podium-base{ height:110px; }
+.rank-3 .podium-base{ height:90px; }
+.podium-base .medal-icon{ display:block; font-size:1.3rem; color:var(--gold-light); margin-bottom:4px; }
+
+.confetti-piece{
+  position:absolute;
+  width:8px; height:14px;
+  top:-20px;
+  opacity:.9;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  to{ transform:translateY(420px) rotate(540deg); opacity:0; }
+}
+
+.podium-actions{ text-align:center; margin-top:10px; }
+.btn-teal{
+  background:linear-gradient(135deg, var(--emerald-light), var(--teal));
+  color:var(--cream);
+  box-shadow:0 10px 22px -8px rgba(31,107,82,.5);
+}
+.btn-teal:hover{ transform:translateY(-3px); box-shadow:0 16px 30px -10px rgba(31,107,82,.6); }
+
+/* ===================== رحلة شهر 7 (Timeline) ===================== */
+.journey-section{ background:var(--navy-deep); color:var(--cream); overflow:hidden; }
+.journey-section .section-title{ color:var(--cream); }
+.journey-section .section-sub{ color:rgba(246,239,223,.7); }
+.journey-section .section-eyebrow{ background:rgba(201,162,75,.14); color:var(--gold-light); }
+
+.timeline{
+  position:relative;
+  display:flex;
+  gap:0;
+  overflow-x:auto;
+  padding:50px 10px 20px;
+  scroll-snap-type:x proximity;
+}
+.timeline::-webkit-scrollbar{ height:8px; }
+.timeline-track{
+  position:absolute;
+  top:112px; right:5%; left:5%;
+  height:2px;
+  background:repeating-linear-gradient(90deg, rgba(201,162,75,.5) 0 10px, transparent 10px 20px);
+  z-index:0;
+}
+.timeline-node{
+  flex:0 0 auto;
+  width:230px;
+  scroll-snap-align:center;
+  position:relative;
+  z-index:1;
+  padding:0 16px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.timeline-node.in-view{ opacity:1; transform:translateY(0); }
+.timeline-dot{
+  width:56px; height:56px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  background:linear-gradient(150deg, var(--teal), var(--navy));
+  border:2px solid var(--gold-light);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem;
+  color:var(--gold-light);
+  box-shadow:0 0 0 6px rgba(201,162,75,.08);
+  transition:transform .3s ease;
+}
+.timeline-node:hover .timeline-dot{ transform:scale(1.12); }
+.timeline-meeting{ font-size:.75rem; color:var(--gold-light); font-weight:700; margin-bottom:4px; }
+.timeline-date{ font-weight:800; font-size:1.1rem; margin-bottom:10px; }
+.timeline-card{
+  background:rgba(246,239,223,.06);
+  border:1px solid rgba(201,162,75,.2);
+  border-radius:var(--radius-md);
+  padding:16px;
+  backdrop-filter:blur(4px);
+}
+.timeline-avg{ font-family:var(--font-display); font-size:1.6rem; font-weight:800; color:var(--gold-light); }
+.timeline-meta{ font-size:.78rem; color:rgba(246,239,223,.65); margin:6px 0 12px; }
+.timeline-btn{
+  width:100%;
+  padding:9px;
+  border-radius:50px;
+  background:transparent;
+  border:1px solid rgba(230,200,120,.5);
+  color:var(--gold-light);
+  font-size:.8rem;
+  font-weight:700;
+  transition:background .3s ease, color .3s ease;
+}
+.timeline-btn:hover{ background:var(--gold-light); color:var(--navy-deep); }
+
+/* ===================== بطاقات الطلاب ===================== */
+.students-section{ background:var(--paper); }
+.students-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
+  gap:22px;
+}
+.student-card{
+  background:var(--cream-soft);
+  border-radius:var(--radius-lg);
+  padding:24px 20px;
+  text-align:center;
+  border:1px solid rgba(31,107,82,.08);
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .6s ease, transform .6s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.student-card.in-view{ opacity:1; transform:translateY(0); }
+.student-card:hover{ box-shadow:var(--shadow-deep); border-color:var(--gold); transform:translateY(-6px); }
+.student-card::before{
+  content:'';
+  position:absolute; top:0; right:0; left:0; height:4px;
+  background:linear-gradient(90deg, var(--emerald), var(--gold));
+  transform:scaleX(0);
+  transform-origin:right;
+  transition:transform .4s ease;
+}
+.student-card:hover::before{ transform:scaleX(1); }
+
+.student-rank-tag{
+  position:absolute; top:14px; left:14px;
+  font-size:.72rem;
+  font-weight:800;
+  color:var(--emerald);
+  background:rgba(31,107,82,.09);
+  padding:3px 10px;
+  border-radius:50px;
+}
+
+.progress-ring-wrap{ position:relative; width:104px; height:104px; margin:0 auto 14px; }
+.progress-ring-wrap svg{ transform:rotate(-90deg); }
+.progress-ring-bg{ fill:none; stroke:rgba(31,107,82,.1); stroke-width:8; }
+.progress-ring-fill{
+  fill:none; stroke:url(#ringGradient); stroke-width:8; stroke-linecap:round;
+  transition:stroke-dashoffset 1.4s cubic-bezier(.16,.84,.44,1);
+}
+.progress-ring-avatar{
+  position:absolute; inset:12px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(150deg, var(--teal), var(--navy));
+  color:var(--cream);
+  font-weight:800;
+  font-family:var(--font-display);
+  font-size:1.3rem;
+  object-fit:cover;
+}
+.progress-ring-score{
+  position:absolute; bottom:-6px; right:50%; transform:translateX(50%);
+  background:var(--gold);
+  color:var(--navy-deep);
+  font-weight:800;
+  font-size:.78rem;
+  padding:2px 10px;
+  border-radius:50px;
+  box-shadow:0 4px 10px -3px rgba(201,162,75,.6);
+}
+
+.student-name{ font-weight:800; color:var(--navy-deep); margin-bottom:12px; font-size:1.02rem; }
+.student-icons{ display:flex; justify-content:center; gap:10px; margin-bottom:16px; font-size:.85rem; color:var(--ink-soft); }
+.student-icons span{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+.student-icons i{ color:var(--teal); font-size:.95rem; }
+.student-icons b{ font-size:.72rem; font-weight:700; color:var(--navy-deep); }
+
+.student-btn{
+  width:100%;
+  padding:10px;
+  border-radius:50px;
+  background:transparent;
+  border:1.5px solid var(--emerald);
+  color:var(--emerald);
+  font-weight:700;
+  font-size:.85rem;
+  transition:background .3s ease, color .3s ease;
+}
+.student-btn:hover{ background:var(--emerald); color:var(--cream); }
+
+/* ===================== الإنجازات ===================== */
+.achievements-section{ background:linear-gradient(180deg, var(--cream) 0%, var(--paper) 100%); }
+.ach-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:22px; }
+.ach-card{
+  background:var(--paper);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  border-right:4px solid var(--gold);
+  box-shadow:var(--shadow-soft);
+  opacity:0; transform:translateY(24px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.ach-card.in-view{ opacity:1; transform:translateY(0); }
+.ach-date{ font-weight:800; color:var(--emerald); margin-bottom:10px; font-family:var(--font-display); font-size:1.1rem; }
+.ach-row{ margin-bottom:8px; font-size:.9rem; }
+.ach-row b{ color:var(--navy-deep); }
+.ach-quote{
+  margin-top:14px; padding-top:14px; border-top:1px dashed rgba(31,107,82,.2);
+  font-style:italic; color:var(--teal); font-size:.88rem;
+}
+
+/* ===================== تذييل ===================== */
+footer{
+  background:var(--navy-deep);
+  color:rgba(246,239,223,.75);
+  padding:56px 5% 26px;
+  text-align:center;
+}
+.footer-logo{ width:64px; margin:0 auto 14px; opacity:.9; }
+.footer-verse{ font-family:var(--font-display); color:var(--gold-light); font-size:1.2rem; margin-bottom:6px; }
+.footer-mentor{
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  margin:26px auto; max-width:320px;
+  background:rgba(246,239,223,.05);
+  border:1px solid rgba(201,162,75,.2);
+  border-radius:50px;
+  padding:8px 20px 8px 8px;
+}
+.footer-mentor img{ width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid var(--gold-light); }
+.footer-mentor .m-name{ font-weight:800; color:var(--cream); font-size:.88rem; }
+.footer-mentor .m-title{ font-size:.72rem; color:rgba(246,239,223,.6); }
+.footer-copy{ font-size:.8rem; margin-top:20px; color:rgba(246,239,223,.45); }
+.footer-admin-link{ font-size:.75rem; color:rgba(246,239,223,.35); }
+
+/* ===================== نافذة Modal ===================== */
+.modal-overlay{
+  position:fixed; inset:0; z-index:500;
+  background:rgba(15,25,25,.65);
+  backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+  opacity:0; visibility:hidden;
+  transition:opacity .35s ease, visibility .35s ease;
+}
+.modal-overlay.open{ opacity:1; visibility:visible; }
+.modal-box{
+  background:var(--paper);
+  border-radius:var(--radius-lg);
+  max-width:640px; width:100%;
+  max-height:86vh;
+  overflow-y:auto;
+  padding:32px;
+  position:relative;
+  transform:scale(.92) translateY(20px);
+  transition:transform .35s cubic-bezier(.2,.8,.3,1.2);
+  box-shadow:var(--shadow-deep);
+}
+.modal-overlay.open .modal-box{ transform:scale(1) translateY(0); }
+.modal-close{
+  position:absolute; top:18px; left:18px;
+  width:34px; height:34px;
+  border-radius:50%;
+  border:none;
+  background:rgba(31,107,82,.08);
+  color:var(--navy-deep);
+  font-size:1.1rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .3s ease;
+}
+.modal-close:hover{ background:var(--gold-soft); }
+.modal-header{ display:flex; align-items:center; gap:16px; margin-bottom:22px; }
+.modal-avatar{
+  width:70px; height:70px; border-radius:50%;
+  background:linear-gradient(150deg, var(--teal), var(--navy));
+  color:var(--cream); display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-family:var(--font-display); font-size:1.4rem;
+  border:3px solid var(--gold-light);
+}
+.modal-title{ font-weight:800; font-size:1.2rem; color:var(--navy-deep); }
+.modal-sub{ color:var(--ink-soft); font-size:.85rem; }
+
+.modal-stats-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:24px; }
+.modal-stat{
+  background:var(--cream-soft); border-radius:12px; padding:12px 6px; text-align:center;
+}
+.modal-stat i{ color:var(--emerald); font-size:1rem; margin-bottom:4px; display:block; }
+.modal-stat b{ display:block; font-size:1.05rem; color:var(--navy-deep); font-family:var(--font-display); }
+.modal-stat span{ font-size:.68rem; color:var(--ink-soft); }
+
+.modal-days-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+.modal-day-row{
+  display:flex; align-items:center; gap:12px;
+  background:var(--cream-soft); border-radius:10px; padding:10px 14px;
+}
+.modal-day-date{ font-weight:800; color:var(--navy-deep); width:52px; font-size:.85rem; flex-shrink:0; }
+.modal-bar-track{ flex:1; height:8px; background:rgba(31,107,82,.1); border-radius:6px; overflow:hidden; }
+.modal-bar-fill{ height:100%; border-radius:6px; background:linear-gradient(90deg, var(--emerald), var(--gold)); width:0; transition:width 1.1s ease; }
+.modal-day-val{ font-weight:800; color:var(--emerald); font-size:.85rem; width:38px; text-align:left; }
+
+.modal-mini-chart{ height:160px; }
+
+/* نافذة تفاصيل اليوم */
+.day-modal-grid{ display:flex; flex-direction:column; gap:10px; }
+.day-student-row{
+  display:grid; grid-template-columns:1fr repeat(5, 56px); align-items:center; gap:8px;
+  background:var(--cream-soft); border-radius:10px; padding:10px 12px; font-size:.78rem;
+}
+.day-student-row .dsr-name{ font-weight:700; color:var(--navy-deep); font-size:.82rem; }
+.day-student-row .dsr-cell{ text-align:center; }
+.dsr-badge{
+  display:inline-block; min-width:34px; padding:2px 6px; border-radius:6px;
+  font-weight:700; font-size:.72rem; color:var(--paper); background:var(--teal);
+}
+.dsr-badge.low{ background:#b8563f; }
+.dsr-badge.mid{ background:var(--gold); color:var(--navy-deep); }
+.dsr-badge.high{ background:var(--emerald); }
+.day-modal-head-row{
+  display:grid; grid-template-columns:1fr repeat(5, 56px); gap:8px;
+  font-size:.68rem; color:var(--ink-soft); font-weight:700; text-align:center; padding:0 12px 6px;
+}
+.day-modal-head-row span:first-child{ text-align:right; }
+
+/* ===================== أزرار عائمة ===================== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
+  background:var(--navy-deep); color:var(--gold-light);
+  padding:12px 26px; border-radius:50px; font-weight:700; font-size:.85rem;
+  box-shadow:var(--shadow-deep);
+  z-index:600; transition:transform .4s cubic-bezier(.2,.9,.3,1.2);
+}
+.toast.show{ transform:translateX(-50%) translateY(0); }
+
+/* ===================== استجابة الشاشات ===================== */
+@media (max-width: 900px){
+  .modal-stats-grid{ grid-template-columns:repeat(3,1fr); row-gap:10px; }
+}
+
+@media (max-width: 720px){
+  .nav-links{
+    position:fixed; top:0; bottom:0; left:0;
+    width:72%; max-width:300px;
+    background:var(--navy-deep);
+    flex-direction:column;
+    padding:100px 30px;
+    transform:translateX(-100%);
+    transition:transform .4s ease;
+    z-index:199;
+  }
+  .nav-links.open{ transform:translateX(0); }
+  .nav-toggle{ display:block; z-index:201; }
+  section{ padding:70px 6%; }
+  .day-student-row, .day-modal-head-row{ grid-template-columns:1fr repeat(5, 42px); font-size:.68rem; }
+}
+
+@media (max-width: 480px){
+  .podium-wrap{ align-items:center; }
+  .podium-card{ width:150px; }
+  .rank-1{ order:-1; }
+  .modal-stats-grid{ grid-template-columns:repeat(2,1fr); }
+}
+
+/* تقليل الحركة لمن يفضل ذلك */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+}
