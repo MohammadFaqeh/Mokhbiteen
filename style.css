@@ -654,7 +654,15 @@ footer{
 .footer-mentor .m-name{ font-weight:800; color:var(--cream); font-size:.88rem; }
 .footer-mentor .m-title{ font-size:.72rem; color:rgba(246,239,223,.6); }
 .footer-copy{ font-size:.8rem; margin-top:20px; color:rgba(246,239,223,.45); }
-.footer-admin-link{ font-size:.75rem; color:rgba(246,239,223,.35); }
+.footer-developer{
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  width:max-content; max-width:100%; margin:12px auto 8px; padding-top:12px;
+  border-top:1px solid rgba(201,162,75,.16);
+  color:rgba(246,239,223,.58); font-size:.78rem;
+}
+.footer-developer i{ color:var(--gold-light); font-size:.72rem; }
+.footer-developer span{ color:var(--cream); font-weight:700; }
+.footer-admin-link{ display:inline-block; margin-top:4px; font-size:.7rem; color:rgba(246,239,223,.3); }
 
 /* ===================== نافذة Modal ===================== */
 .modal-overlay{
