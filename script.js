@@ -6,12 +6,33 @@
 (function () {
   "use strict";
 
-  const DATA = MOKHBITEEN_DATA;
+  const PREVIEW_KEY = "mokhbiteen_private_preview_v1";
+  const DRAFT_KEY = "mokhbiteen_draft_data_v2";
+  let isPrivatePreview = false;
+  try {
+    isPrivatePreview = new URLSearchParams(window.location.search).get("preview") === "1" &&
+      sessionStorage.getItem(PREVIEW_KEY) === "1";
+  } catch (e) {}
+
+  let DATA = MOKHBITEEN_DATA;
+  if (isPrivatePreview) {
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) DATA = JSON.parse(draft);
+    } catch (e) {}
+  }
   const students = DATA.students; // مرتبون مسبقًا حسب المعدل
   const days = DATA.days;
 
   /* مزامنة النصوص العامة مع data.js حتى تظهر تعديلات لوحة التحكم */
   const meta = DATA.meta;
+  if (isPrivatePreview) {
+    document.body.classList.add("preview-mode");
+  } else if (meta.sitePublished === false) {
+    document.body.classList.add("site-closed");
+  }
+  const closedEyebrow = document.querySelector(".site-closed-eyebrow");
+  if (closedEyebrow) closedEyebrow.textContent = meta.projectName;
   function setText(id, value) {
     const el = document.getElementById(id);
     if (el && value) el.textContent = value;

@@ -92,6 +92,7 @@
   let workingData = loadDraft() || JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
   let activeDayIndex = 0;
   if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
+  if (workingData.meta.sitePublished === undefined) workingData.meta.sitePublished = true;
 
   function loadDraft() {
     try {
@@ -108,6 +109,40 @@
     t.classList.add("show");
     setTimeout(() => t.classList.remove("show"), 2400);
   }
+
+  /* ---------------------------------------------------------------------
+     حالة النشر والمعاينة الخاصة
+  --------------------------------------------------------------------- */
+  const publishStatus = document.getElementById("publishStatus");
+  const publishStatusText = document.getElementById("publishStatusText");
+  function renderPublicationStatus() {
+    const isLive = workingData.meta.sitePublished !== false;
+    publishStatus.classList.toggle("is-live", isLive);
+    publishStatusText.textContent = isLive
+      ? "المسودة مضبوطة لتظهر للزوار بعد رفع data.js"
+      : "المسودة مضبوطة على وضع التجهيز — الزوار سيرون صفحة الانتظار";
+  }
+
+  document.getElementById("closeSiteBtn").addEventListener("click", () => {
+    workingData.meta.sitePublished = false;
+    saveDraft();
+    renderPublicationStatus();
+    showToast("تم ضبط وضع التجهيز — صدّر data.js وارفعه لإغلاق الموقع للزوار");
+  });
+
+  document.getElementById("publishSiteBtn").addEventListener("click", () => {
+    workingData.meta.sitePublished = true;
+    saveDraft();
+    renderPublicationStatus();
+    showToast("تم تجهيز المسودة للنشر — صدّر data.js وارفعه لفتح الموقع للزوار");
+  });
+
+  document.getElementById("sitePreviewBtn").addEventListener("click", () => {
+    saveDraft();
+    try { sessionStorage.setItem("mokhbiteen_private_preview_v1", "1"); } catch (e) {}
+    const previewWindow = window.open("index.html?preview=1", "_blank");
+    if (!previewWindow) showToast("اسمح بالنوافذ المنبثقة لفتح المعاينة");
+  });
 
   /* ---------------------------------------------------------------------
      بيانات عامة
@@ -347,6 +382,7 @@
     downloadText(buildFileText(), `نسخة-احتياطية-${workingData.meta.monthLabel.replace(/\s+/g, "-")}.js`);
     workingData.meta.monthLabel = label;
     workingData.meta.year = year || String(new Date().getFullYear());
+    workingData.meta.sitePublished = false;
     newMonthYear.value = workingData.meta.year;
     workingData.meta.heroTitle = `لوحة شرف ${label}`;
     workingData.days = Array.from({ length: count }, (_, index) => emptyMeeting(index));
@@ -493,6 +529,7 @@
     localStorage.removeItem(STORAGE_KEY);
     workingData = JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
     if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
+    if (workingData.meta.sitePublished === undefined) workingData.meta.sitePublished = true;
     activeDayIndex = 0;
     newMonthYear.value = workingData.meta.year;
     renderAll();
@@ -503,6 +540,7 @@
      التشغيل
   --------------------------------------------------------------------- */
   function renderAll() {
+    renderPublicationStatus();
     renderMeta();
     renderMeetingsManager();
     renderDayTabs();

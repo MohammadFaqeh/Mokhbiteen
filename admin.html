@@ -77,6 +77,11 @@
   }
   .meeting-manage-row strong{ align-self:center; color:var(--navy-deep); }
   .admin-warning{ color:#8a4d27; font-size:.82rem; margin:10px 0 0; }
+  .publish-panel{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .publish-status{ display:flex; align-items:center; gap:10px; font-weight:800; color:var(--navy-deep); }
+  .publish-dot{ width:11px; height:11px; border-radius:50%; background:#b8563f; box-shadow:0 0 0 5px rgba(184,86,63,.1); }
+  .publish-status.is-live .publish-dot{ background:var(--emerald); box-shadow:0 0 0 5px rgba(31,107,82,.1); }
+  .publish-help{ width:100%; margin:0; color:var(--ink-soft); font-size:.82rem; line-height:1.8; }
   pre#exportPreview{
     max-height:280px; overflow:auto; background:var(--navy-deep); color:#dce8e0;
     padding:16px; border-radius:12px; font-size:.72rem; display:none;
@@ -158,6 +163,19 @@
   <div class="admin-card">
     <h2><i class="fa-solid fa-gear"></i> بيانات عامة عن المشروع</h2>
     <div class="meta-grid" id="metaFields"></div>
+  </div>
+
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-satellite-dish"></i> حالة ظهور الموقع</h2>
+    <div class="publish-panel">
+      <div class="publish-status" id="publishStatus"><span class="publish-dot"></span><span id="publishStatusText"></span></div>
+      <div class="admin-actions" style="margin-top:0">
+        <button class="btn btn-outline btn-sm" style="color:#b8563f;border-color:#b8563f" id="closeSiteBtn"><i class="fa-solid fa-eye-slash"></i> إغلاق للزوار</button>
+        <button class="btn btn-teal btn-sm" id="sitePreviewBtn"><i class="fa-solid fa-eye"></i> معاينة المسودة</button>
+        <button class="btn btn-gold btn-sm" id="publishSiteBtn"><i class="fa-solid fa-cloud-arrow-up"></i> تجهيز للنشر</button>
+      </div>
+      <p class="publish-help">بعد «إغلاق للزوار» أو «تجهيز للنشر» صدّر <code>data.js</code> واستبدله على الموقع. زر المعاينة يعرض آخر مسودة محفوظة على جهازك فقط.</p>
+    </div>
   </div>
 
   <div class="admin-card">

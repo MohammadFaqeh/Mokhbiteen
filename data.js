@@ -5,6 +5,7 @@ const MOKHBITEEN_DATA = {
     "projectName": "مشروع المخبتين القرآني",
     "monthLabel": "شهر 7",
     "year": "2026",
+    "sitePublished": true,
     "verse": "وَبَشِّرِ الْمُخْبِتِينَ",
     "verseRef": "سورة الحج – الآية 34",
     "heroTitle": "لوحة شرف شهر 7",
