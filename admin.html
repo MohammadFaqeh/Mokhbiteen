@@ -36,7 +36,7 @@
     margin-bottom:26px; box-shadow:var(--shadow-soft);
   }
   .admin-card h2{ margin:0 0 18px; color:var(--navy-deep); font-family:var(--font-display); font-size:1.35rem; }
-  .admin-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .admin-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; max-height:190px; overflow:auto; padding:2px; }
   .admin-tab{
     padding:8px 18px; border-radius:50px; border:1.5px solid rgba(31,107,82,.25);
     background:transparent; color:var(--emerald); font-weight:700; font-size:.85rem;
@@ -67,7 +67,10 @@
   }
   .day-field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:14px; }
   .month-setup-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; align-items:end; }
-  .meetings-manager{ display:grid; gap:10px; margin-top:18px; }
+  .meetings-manager{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:10px;
+    margin-top:18px; max-height:520px; overflow:auto; padding-left:6px;
+  }
   .meeting-manage-row{
     display:grid; grid-template-columns:90px minmax(180px,1fr) 44px; gap:10px; align-items:end;
     padding:12px; border-radius:12px; background:var(--cream-soft);
@@ -170,7 +173,7 @@
       </div>
       <div class="meta-field">
         <label>عدد اللقاءات</label>
-        <input type="number" id="newMeetingsCount" min="1" max="12" value="5">
+        <input type="number" id="newMeetingsCount" min="1" max="48" value="5">
       </div>
       <button class="btn btn-gold btn-sm" id="startNewMonthBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> بدء شهر جديد</button>
     </div>

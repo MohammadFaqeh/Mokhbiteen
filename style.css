@@ -457,17 +457,34 @@ section{ position:relative; padding:100px 5%; }
 .journey-section .section-eyebrow{ background:rgba(201,162,75,.14); color:var(--gold-light); }
 
 .timeline{
-  position:relative;
-  display:flex;
-  gap:0;
-  overflow-x:auto;
-  padding:50px 10px 20px;
-  scroll-snap-type:x proximity;
+  display:flex; flex-direction:column; gap:30px;
+  padding:34px 5% 24px;
 }
-.timeline::-webkit-scrollbar{ height:8px; }
+.timeline-month{
+  background:rgba(246,239,223,.035);
+  border:1px solid rgba(201,162,75,.16);
+  border-radius:var(--radius-lg);
+  padding:20px 8px 12px;
+}
+.timeline-month-head{
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  padding:0 18px 12px;
+}
+.timeline-month-label{ color:var(--gold-light); font-size:1.08rem; font-weight:800; }
+.timeline-month-label i{ margin-left:7px; }
+.timeline-month-count{
+  display:inline-block; margin-right:10px; padding:4px 9px; border-radius:50px;
+  background:rgba(201,162,75,.12); color:rgba(246,239,223,.7); font-size:.72rem;
+}
+.timeline-month-average{ display:flex; align-items:center; gap:9px; white-space:nowrap; }
+.timeline-month-average small{ color:rgba(246,239,223,.55); font-size:.7rem; }
+.timeline-month-average strong{ color:var(--gold-light); font-family:var(--font-display); font-size:1.25rem; }
+.timeline-month-scroll{ position:relative; overflow-x:auto; scroll-snap-type:x proximity; padding:34px 2px 12px; }
+.timeline-month-scroll::-webkit-scrollbar{ height:8px; }
+.timeline-month-list{ display:flex; width:max-content; min-width:100%; }
 .timeline-track{
   position:absolute;
-  top:112px; right:5%; left:5%;
+  top:61px; right:3%; left:3%;
   height:2px;
   background:repeating-linear-gradient(90deg, rgba(201,162,75,.5) 0 10px, transparent 10px 20px);
   z-index:0;
@@ -719,7 +736,7 @@ footer{
 .modal-stat b{ display:block; font-size:1.05rem; color:var(--navy-deep); font-family:var(--font-display); }
 .modal-stat span{ font-size:.68rem; color:var(--ink-soft); }
 
-.modal-days-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+.modal-days-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; max-height:360px; overflow-y:auto; padding-left:5px; }
 .modal-day-row{
   display:flex; align-items:center; gap:12px;
   background:var(--cream-soft); border-radius:10px; padding:10px 14px;
@@ -729,7 +746,8 @@ footer{
 .modal-bar-fill{ height:100%; border-radius:6px; background:linear-gradient(90deg, var(--emerald), var(--gold)); width:0; transition:width 1.1s ease; }
 .modal-day-val{ font-weight:800; color:var(--emerald); font-size:.85rem; width:38px; text-align:left; }
 
-.modal-mini-chart{ height:160px; }
+.modal-mini-chart-scroll{ width:100%; overflow-x:auto; padding-bottom:6px; }
+.modal-mini-chart{ height:180px; }
 
 /* نافذة تفاصيل اليوم */
 .day-modal-grid{ display:flex; flex-direction:column; gap:10px; }
@@ -781,6 +799,9 @@ footer{
   .nav-links.open{ transform:translateX(0); }
   .nav-toggle{ display:block; z-index:201; }
   section{ padding:70px 6%; }
+  .timeline{ padding-right:3%; padding-left:3%; }
+  .timeline-month-head{ align-items:flex-start; }
+  .timeline-month-count{ display:block; width:max-content; margin:7px 0 0; }
   .day-student-row, .day-modal-head-row{ grid-template-columns:1fr repeat(5, 42px); font-size:.68rem; }
 }
 
@@ -789,6 +810,7 @@ footer{
   .podium-card{ width:150px; }
   .rank-1{ order:-1; }
   .modal-stats-grid{ grid-template-columns:repeat(2,1fr); }
+  .timeline-month-head{ flex-direction:column; gap:8px; }
 }
 
 /* تقليل الحركة لمن يفضل ذلك */

@@ -190,21 +190,70 @@
      رحلة شهر 7 (Timeline)
   --------------------------------------------------------------------- */
   const timeline = document.getElementById("timeline");
-  days.forEach((d) => {
-    const node = document.createElement("div");
-    node.className = "timeline-node reveal";
-    node.innerHTML = `
-      <div class="timeline-dot"><i class="fa-solid fa-book-quran"></i></div>
-      <div class="timeline-meeting">اللقاء ${d.meetingNumber}</div>
-      <div class="timeline-date">${d.date}</div>
-      <div class="timeline-card">
-        <div class="timeline-avg">${d.groupAverage.toFixed(1)}</div>
-        <div class="timeline-meta">
-          <i class="fa-solid fa-users"></i> ${d.presentCount} من ${d.totalCount} حاضر
+
+  function meetingMonth(day) {
+    let iso = day.isoDate || "";
+    if (!iso && /^\d{2}\/\d{2}$/.test(day.date || "")) {
+      const [dd, mm] = day.date.split("/");
+      iso = `${meta.year || new Date().getFullYear()}-${mm}-${dd}`;
+    }
+    if (!iso) return { key: "undated", label: "لقاءات دون تاريخ" };
+    const parsed = new Date(`${iso}T12:00:00`);
+    return {
+      key: iso.slice(0, 7),
+      label: new Intl.DateTimeFormat("ar-JO", { month: "long", year: "numeric" }).format(parsed)
+    };
+  }
+
+  const monthGroups = [];
+  days.forEach((day) => {
+    const month = meetingMonth(day);
+    let group = monthGroups.find((item) => item.key === month.key);
+    if (!group) {
+      group = { ...month, days: [] };
+      monthGroups.push(group);
+    }
+    group.days.push(day);
+  });
+
+  monthGroups.forEach((group) => {
+    const validAverages = group.days.map((day) => Number(day.groupAverage) || 0);
+    const monthAverage = validAverages.length
+      ? validAverages.reduce((sum, value) => sum + value, 0) / validAverages.length
+      : 0;
+    const section = document.createElement("section");
+    section.className = "timeline-month reveal";
+    section.innerHTML = `
+      <div class="timeline-month-head">
+        <div>
+          <span class="timeline-month-label"><i class="fa-regular fa-calendar"></i> ${group.label}</span>
+          <span class="timeline-month-count">${group.days.length} ${group.days.length === 1 ? "لقاء" : "لقاءات"}</span>
         </div>
-        <button class="timeline-btn" data-day="${d.id}">عرض تفاصيل اليوم</button>
+        <div class="timeline-month-average"><small>متوسط الشهر</small><strong>${monthAverage.toFixed(1)}</strong></div>
+      </div>
+      <div class="timeline-month-scroll">
+        <div class="timeline-track"></div>
+        <div class="timeline-month-list"></div>
       </div>`;
-    timeline.appendChild(node);
+
+    const list = section.querySelector(".timeline-month-list");
+    group.days.forEach((d) => {
+      const node = document.createElement("div");
+      node.className = "timeline-node reveal";
+      node.innerHTML = `
+        <div class="timeline-dot"><i class="fa-solid fa-book-quran"></i></div>
+        <div class="timeline-meeting">اللقاء ${d.meetingNumber}</div>
+        <div class="timeline-date">${d.date || "بدون تاريخ"}</div>
+        <div class="timeline-card">
+          <div class="timeline-avg">${d.groupAverage.toFixed(1)}</div>
+          <div class="timeline-meta">
+            <i class="fa-solid fa-users"></i> ${d.presentCount} من ${d.totalCount} حاضر
+          </div>
+          <button class="timeline-btn" data-day="${d.id}">عرض تفاصيل اليوم</button>
+        </div>`;
+      list.appendChild(node);
+    });
+    timeline.appendChild(section);
   });
 
   /* ---------------------------------------------------------------------
@@ -276,7 +325,9 @@
           </div>`).join("")}
       </div>
       <h4 style="margin:0 0 10px;color:var(--navy-deep)">تطور الأداء عبر الشهر</h4>
-      <div class="modal-mini-chart"><canvas id="miniChart"></canvas></div>`;
+      <div class="modal-mini-chart-scroll">
+        <div class="modal-mini-chart" style="width:${Math.max(560, st.days.length * 62)}px"><canvas id="miniChart"></canvas></div>
+      </div>`;
 
     studentModal.classList.add("open");
     document.body.style.overflow = "hidden";

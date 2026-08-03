@@ -247,13 +247,14 @@
     if (year) workingData.meta.year = year;
     return `${day}/${month}`;
   }
-  function emptyStudentDay(date) {
-    return { date: date || "", attendance: 0, memorization: 0, revision: 0, worship: 0, evaluation: 0, dayAverage: 0 };
+  function emptyStudentDay(date, isoDate) {
+    return { date: date || "", isoDate: isoDate || "", attendance: 0, memorization: 0, revision: 0, worship: 0, evaluation: 0, dayAverage: 0 };
   }
   function emptyMeeting(index) {
     return {
       id: `meeting-${Date.now()}-${index}`,
       date: "",
+      isoDate: "",
       meetingNumber: index + 1,
       groupAverage: 0,
       presentCount: 0,
@@ -273,7 +274,7 @@
         <strong>اللقاء ${index + 1}</strong>
         <div class="meta-field">
           <label>تاريخ اللقاء</label>
-          <input type="date" data-meeting-date="${index}" value="${toCalendarDate(day.date)}">
+          <input type="date" data-meeting-date="${index}" value="${day.isoDate || toCalendarDate(day.date)}">
         </div>
         <button class="row-del" data-delete-meeting="${index}" title="حذف اللقاء"><i class="fa-solid fa-trash"></i></button>
       </div>`).join("");
@@ -284,8 +285,12 @@
     const index = Number(e.target.dataset.meetingDate);
     const displayDate = toDisplayDate(e.target.value);
     workingData.days[index].date = displayDate;
+    workingData.days[index].isoDate = e.target.value;
     workingData.students.forEach((student) => {
-      if (student.days[index]) student.days[index].date = displayDate;
+      if (student.days[index]) {
+        student.days[index].date = displayDate;
+        student.days[index].isoDate = e.target.value;
+      }
     });
     recalcAllAndRank();
     saveDraft();
@@ -316,8 +321,8 @@
   });
 
   document.getElementById("addMeetingBtn").addEventListener("click", () => {
-    if (workingData.days.length >= 12) {
-      showToast("الحد الأقصى 12 لقاء");
+    if (workingData.days.length >= 48) {
+      showToast("الحد الأقصى 48 لقاء");
       return;
     }
     workingData.days.push(emptyMeeting(workingData.days.length));
@@ -332,7 +337,7 @@
   document.getElementById("startNewMonthBtn").addEventListener("click", () => {
     const label = newMonthLabel.value.trim();
     const year = String(newMonthYear.value || "").trim();
-    const count = Math.max(1, Math.min(12, Number(newMeetingsCount.value) || 5));
+    const count = Math.max(1, Math.min(48, Number(newMeetingsCount.value) || 5));
     if (!label) {
       showToast("اكتب اسم الشهر الجديد أولًا");
       newMonthLabel.focus();
