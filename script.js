@@ -27,9 +27,33 @@
   /* مزامنة النصوص العامة مع data.js حتى تظهر تعديلات لوحة التحكم */
   const meta = DATA.meta;
   if (isPrivatePreview) {
+    document.body.classList.remove("site-status-loading");
     document.body.classList.add("preview-mode");
-  } else if (meta.sitePublished === false) {
-    document.body.classList.add("site-closed");
+  } else {
+    checkPublishedStatus();
+  }
+
+  async function checkPublishedStatus() {
+    let isPublished = meta.sitePublished !== false;
+    try {
+      const config = window.MOKHBITEEN_SUPABASE;
+      if (config && window.supabase) {
+        const client = window.supabase.createClient(config.url, config.publishableKey, {
+          auth: { persistSession: false, autoRefreshToken: false }
+        });
+        const { data, error } = await client
+          .from("site_settings")
+          .select("is_published")
+          .eq("id", "main")
+          .single();
+        if (error) throw error;
+        isPublished = data.is_published;
+      }
+    } catch (error) {
+      console.error("تعذر قراءة حالة نشر الموقع؛ تم استخدام data.js كخيار احتياطي:", error);
+    }
+    document.body.classList.remove("site-status-loading", "site-closed");
+    if (!isPublished) document.body.classList.add("site-closed");
   }
   const closedEyebrow = document.querySelector(".site-closed-eyebrow");
   if (closedEyebrow) closedEyebrow.textContent = meta.projectName;

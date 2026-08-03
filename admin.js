@@ -6,30 +6,17 @@
 (function () {
   "use strict";
 
-  /* ---------------------------------------------------------------------
-     حماية الصفحة بكلمة مرور
-     ---------------------------------------------------------------------
-     لتغييرها: افتح المتصفح على أي موقع، اذهب إلى Console (أدوات المطور)،
-     واكتب الأمر التالي بعد وضع كلمة المرور الجديدة مكان NEW_PASSWORD:
-
-       crypto.subtle.digest('SHA-256', new TextEncoder().encode('NEW_PASSWORD'))
-         .then(b => console.log(Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')))
-
-     ثم انسخ القيمة الناتجة وضعها بدل القيمة الحالية في ADMIN_PASSWORD_HASH بالأسفل.
-     ملاحظة: هذه حماية أساسية من جهة المتصفح فقط لمنع الدخول العرضي، وليست
-     حماية قوية بمستوى خادم حقيقي — لا تستخدمها لبيانات حساسة جدًا.
-  --------------------------------------------------------------------- */
-  const ADMIN_PASSWORD_HASH = "28710d9171458c30b4a85ec6f7d481463bfda0da1897f7740a1ede970d31f3ad";
-
-  async function sha256(text) {
-    const enc = new TextEncoder().encode(text);
-    const buf = await crypto.subtle.digest("SHA-256", enc);
-    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
+  const supabaseConfig = window.MOKHBITEEN_SUPABASE;
+  const supabaseClient = supabaseConfig && window.supabase
+    ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+      })
+    : null;
 
   const lockOverlay = document.getElementById("lockOverlay");
   const adminContent = document.getElementById("adminContent");
   const lockForm = document.getElementById("lockForm");
+  const lockEmail = document.getElementById("lockEmailInput");
   const lockInput = document.getElementById("lockPasswordInput");
   const lockError = document.getElementById("lockError");
   let adminInitialized = false;
@@ -38,6 +25,7 @@
     lockOverlay.style.display = "none";
     adminContent.classList.remove("admin-hidden");
     lockError.textContent = "";
+    lockEmail.value = "";
     lockInput.value = "";
     if (!adminInitialized) {
       adminInitialized = true;
@@ -49,30 +37,36 @@
     adminContent.classList.add("admin-hidden");
     lockOverlay.style.display = "flex";
     lockError.textContent = "";
+    lockEmail.value = "";
     lockInput.value = "";
   }
 
   lockForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const val = lockInput.value;
-    let hash;
-    try {
-      hash = await sha256(val);
-    } catch (err) {
-      // إن لم يدعم المتصفح Web Crypto (نادر جدًا)، لا يمكن التحقق بأمان
-      lockError.textContent = "تعذر التحقق من كلمة المرور في هذا المتصفح.";
+    if (!supabaseClient) {
+      lockError.textContent = "تعذر الاتصال بخدمة تسجيل الدخول. تحقق من الإنترنت ثم أعد المحاولة.";
       return;
     }
-    if (hash === ADMIN_PASSWORD_HASH) {
+    const submitButton = lockForm.querySelector("button[type='submit']");
+    submitButton.disabled = true;
+    submitButton.textContent = "جاري التحقق...";
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: lockEmail.value.trim(),
+      password: lockInput.value
+    });
+    submitButton.disabled = false;
+    submitButton.textContent = "دخول";
+    if (!error) {
       unlock();
     } else {
-      lockError.textContent = "كلمة المرور غير صحيحة، حاول مرة أخرى.";
+      lockError.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
       lockInput.value = "";
       lockInput.focus();
     }
   });
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (supabaseClient) await supabaseClient.auth.signOut();
     lockAdmin();
     lockInput.focus();
   });
@@ -119,23 +113,49 @@
     const isLive = workingData.meta.sitePublished !== false;
     publishStatus.classList.toggle("is-live", isLive);
     publishStatusText.textContent = isLive
-      ? "المسودة مضبوطة لتظهر للزوار بعد رفع data.js"
-      : "المسودة مضبوطة على وضع التجهيز — الزوار سيرون صفحة الانتظار";
+      ? "الموقع مفتوح حاليًا للزوار"
+      : "الموقع مغلق حاليًا — الزوار يرون صفحة الانتظار";
   }
 
-  document.getElementById("closeSiteBtn").addEventListener("click", () => {
-    workingData.meta.sitePublished = false;
+  async function updateRemotePublication(isPublished) {
+    if (!supabaseClient) {
+      showToast("تعذر الاتصال بخدمة النشر");
+      return;
+    }
+    const { data, error } = await supabaseClient
+      .from("site_settings")
+      .update({ is_published: isPublished, updated_at: new Date().toISOString() })
+      .eq("id", "main")
+      .select("is_published")
+      .single();
+    if (error) {
+      console.error("تعذر تغيير حالة الموقع:", error);
+      showToast("لم تتغير حالة الموقع — تحقق من الاتصال والصلاحيات");
+      return;
+    }
+    workingData.meta.sitePublished = data.is_published;
     saveDraft();
     renderPublicationStatus();
-    showToast("تم ضبط وضع التجهيز — صدّر data.js وارفعه لإغلاق الموقع للزوار");
-  });
+    showToast(isPublished ? "تم فتح الموقع للزوار فورًا" : "تم إغلاق الموقع للزوار فورًا");
+  }
 
-  document.getElementById("publishSiteBtn").addEventListener("click", () => {
-    workingData.meta.sitePublished = true;
-    saveDraft();
-    renderPublicationStatus();
-    showToast("تم تجهيز المسودة للنشر — صدّر data.js وارفعه لفتح الموقع للزوار");
-  });
+  document.getElementById("closeSiteBtn").addEventListener("click", () => updateRemotePublication(false));
+
+  document.getElementById("publishSiteBtn").addEventListener("click", () => updateRemotePublication(true));
+
+  async function loadRemotePublicationStatus() {
+    if (!supabaseClient) return;
+    const { data, error } = await supabaseClient
+      .from("site_settings")
+      .select("is_published")
+      .eq("id", "main")
+      .single();
+    if (!error && data) {
+      workingData.meta.sitePublished = data.is_published;
+      saveDraft();
+      renderPublicationStatus();
+    }
+  }
 
   document.getElementById("sitePreviewBtn").addEventListener("click", () => {
     saveDraft();
@@ -369,7 +389,7 @@
     showToast("تمت إضافة لقاء جديد — اختر تاريخه من التقويم");
   });
 
-  document.getElementById("startNewMonthBtn").addEventListener("click", () => {
+  document.getElementById("startNewMonthBtn").addEventListener("click", async () => {
     const label = newMonthLabel.value.trim();
     const year = String(newMonthYear.value || "").trim();
     const count = Math.max(1, Math.min(48, Number(newMeetingsCount.value) || 5));
@@ -394,7 +414,8 @@
     saveDraft();
     newMonthLabel.value = "";
     renderAll();
-    showToast(`تم بدء ${label} — اختر تواريخ اللقاءات من التقويم`);
+    await updateRemotePublication(false);
+    showToast(`تم بدء ${label} وإغلاق الموقع للزوار — اختر تواريخ اللقاءات`);
   });
 
   function renderStudentsTable() {
@@ -548,6 +569,7 @@
     renderAchievements();
   }
   renderAll();
+  loadRemotePublicationStatus();
 
   } // نهاية initAdminPanel
 

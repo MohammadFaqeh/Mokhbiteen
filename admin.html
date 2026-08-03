@@ -134,7 +134,8 @@
     <h2>لوحة تحكم المخبتين</h2>
     <p>هذه الصفحة مخصصة للمشرف فقط. الرجاء إدخال كلمة المرور للمتابعة.</p>
     <form id="lockForm">
-      <input type="password" id="lockPasswordInput" placeholder="كلمة المرور" autocomplete="off" required>
+      <input type="email" id="lockEmailInput" placeholder="البريد الإلكتروني للمشرف" autocomplete="username" required>
+      <input type="password" id="lockPasswordInput" placeholder="كلمة مرور حساب المشرف" autocomplete="current-password" required>
       <button type="submit" class="btn btn-gold">دخول</button>
       <div class="lock-error" id="lockError"></div>
     </form>
@@ -174,7 +175,7 @@
         <button class="btn btn-teal btn-sm" id="sitePreviewBtn"><i class="fa-solid fa-eye"></i> معاينة المسودة</button>
         <button class="btn btn-gold btn-sm" id="publishSiteBtn"><i class="fa-solid fa-cloud-arrow-up"></i> تجهيز للنشر</button>
       </div>
-      <p class="publish-help">بعد «إغلاق للزوار» أو «تجهيز للنشر» صدّر <code>data.js</code> واستبدله على الموقع. زر المعاينة يعرض آخر مسودة محفوظة على جهازك فقط.</p>
+      <p class="publish-help">الإغلاق والفتح يطبّقان فورًا على جميع الزوار عبر Supabase ولا يحتاجان إلى استبدال <code>data.js</code>. زر المعاينة يعرض آخر مسودة محفوظة على جهازك فقط.</p>
     </div>
   </div>
 
@@ -236,6 +237,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="data.js"></script>
 <script src="admin.js"></script>
 </body>
