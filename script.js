@@ -88,6 +88,45 @@
   setText("supervisorTitle", meta.supervisorTitle);
   setText("footerCopyright", `جميع الحقوق محفوظة © ${meta.projectName}`);
 
+  /* مشغل تلاوة الآية — يعمل فقط بطلب الزائر */
+  const verseAudio = document.getElementById("verseAudio");
+  const verseAudioToggle = document.getElementById("verseAudioToggle");
+  const verseAudioProgress = document.getElementById("verseAudioProgress");
+  const verseAudioTime = document.getElementById("verseAudioTime");
+  function formatAudioTime(seconds) {
+    if (!Number.isFinite(seconds)) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+  }
+  function updateAudioUI() {
+    const duration = Number.isFinite(verseAudio.duration) ? verseAudio.duration : 0;
+    verseAudioProgress.value = duration ? (verseAudio.currentTime / duration) * 100 : 0;
+    verseAudioTime.textContent = `${formatAudioTime(verseAudio.currentTime)} / ${formatAudioTime(duration)}`;
+  }
+  verseAudioToggle.addEventListener("click", () => {
+    if (verseAudio.paused) {
+      verseAudio.play().catch(() => showToast("تعذر تشغيل التلاوة في هذا المتصفح"));
+    } else {
+      verseAudio.pause();
+    }
+  });
+  verseAudio.addEventListener("play", () => {
+    verseAudioToggle.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i>';
+    verseAudioToggle.setAttribute("aria-label", "إيقاف تلاوة الآية مؤقتًا");
+  });
+  verseAudio.addEventListener("pause", () => {
+    verseAudioToggle.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
+    verseAudioToggle.setAttribute("aria-label", "تشغيل تلاوة الآية");
+  });
+  verseAudio.addEventListener("loadedmetadata", updateAudioUI);
+  verseAudio.addEventListener("timeupdate", updateAudioUI);
+  verseAudio.addEventListener("ended", updateAudioUI);
+  verseAudioProgress.addEventListener("input", () => {
+    if (Number.isFinite(verseAudio.duration)) {
+      verseAudio.currentTime = (Number(verseAudioProgress.value) / 100) * verseAudio.duration;
+    }
+  });
+
   /* ---------------------------------------------------------------------
      أدوات مساعدة
   --------------------------------------------------------------------- */

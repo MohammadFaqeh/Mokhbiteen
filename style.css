@@ -265,7 +265,32 @@ a{ color:inherit; text-decoration:none; }
   animation:fadeUp 1s ease .5s forwards;
   font-size:.85rem;
   color:rgba(246,239,223,.65);
-  margin-bottom:34px;
+  margin-bottom:12px;
+}
+
+.verse-audio-player{
+  width:min(430px,90%); margin:0 auto 28px; padding:10px 13px;
+  display:flex; align-items:center; gap:12px;
+  background:rgba(246,239,223,.07); border:1px solid rgba(230,200,120,.25);
+  border-radius:18px; backdrop-filter:blur(7px);
+  opacity:0; animation:fadeUp 1s ease .56s forwards;
+  box-shadow:0 12px 28px rgba(4,20,24,.15);
+}
+.verse-audio-toggle{
+  flex:0 0 42px; width:42px; height:42px; border:none; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(145deg,var(--gold-light),var(--gold)); color:var(--navy-deep);
+  box-shadow:0 6px 18px rgba(201,162,75,.28); transition:transform .25s ease;
+}
+.verse-audio-toggle:hover{ transform:scale(1.07); }
+.verse-audio-toggle i{ transform:translateX(-1px); }
+.verse-audio-content{ flex:1; min-width:0; }
+.verse-audio-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
+.verse-audio-head span{ color:var(--cream); font-size:.76rem; font-weight:700; }
+.verse-audio-head span i{ color:var(--gold-light); margin-left:5px; }
+.verse-audio-head time{ direction:ltr; color:rgba(246,239,223,.58); font-size:.68rem; white-space:nowrap; }
+.verse-audio-progress{
+  display:block; width:100%; height:4px; direction:ltr; accent-color:var(--gold-light); cursor:pointer;
 }
 
 .hero-title{
