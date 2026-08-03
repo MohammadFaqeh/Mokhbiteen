@@ -90,6 +90,7 @@
 
   /* مشغل تلاوة الآية — يعمل فقط بطلب الزائر */
   const verseAudio = document.getElementById("verseAudio");
+  const verseAudioPlayer = document.getElementById("verseAudioPlayer");
   const verseAudioToggle = document.getElementById("verseAudioToggle");
   const verseAudioProgress = document.getElementById("verseAudioProgress");
   const verseAudioTime = document.getElementById("verseAudioTime");
@@ -111,10 +112,12 @@
     }
   });
   verseAudio.addEventListener("play", () => {
+    verseAudioPlayer.classList.add("is-playing");
     verseAudioToggle.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i>';
     verseAudioToggle.setAttribute("aria-label", "إيقاف تلاوة الآية مؤقتًا");
   });
   verseAudio.addEventListener("pause", () => {
+    verseAudioPlayer.classList.remove("is-playing");
     verseAudioToggle.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
     verseAudioToggle.setAttribute("aria-label", "تشغيل تلاوة الآية");
   });
