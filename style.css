@@ -89,6 +89,14 @@ body.site-status-loading .site-closed-card img{ width:74px; margin-bottom:10px; 
 }
 .site-closed-admin-link:hover{ color:var(--gold-light); }
 body.site-status-loading .site-closed-admin-link{ display:none; }
+.site-closed-developer{
+  width:max-content; max-width:100%; margin:18px auto 0 !important; padding-top:13px;
+  border-top:1px solid rgba(230,200,120,.14); color:rgba(246,239,223,.4) !important;
+  font-size:.7rem !important; line-height:1.4 !important;
+}
+.site-closed-developer i{ color:rgba(230,200,120,.65); margin-left:5px; }
+.site-closed-developer strong{ color:rgba(246,239,223,.72); font-weight:700; }
+body.site-status-loading .site-closed-developer{ display:none; }
 .preview-mode-banner{
   position:fixed; top:0; right:0; left:0; z-index:4500; display:none;
   align-items:center; justify-content:center; gap:9px; padding:9px 16px;
