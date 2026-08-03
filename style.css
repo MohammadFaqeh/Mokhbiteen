@@ -59,6 +59,15 @@ body.site-closed{ overflow:hidden; }
 body.site-closed .site-closed-overlay{ display:flex; }
 body.site-status-loading{ overflow:hidden; }
 body.site-status-loading .site-closed-overlay{ display:flex; }
+body.site-status-loading .site-closed-card h1,
+body.site-status-loading .site-closed-card p,
+body.site-status-loading .site-closed-eyebrow{ display:none; }
+body.site-status-loading .site-closed-card::after{
+  content:'جارٍ تحميل الموقع…'; display:block; margin-top:12px;
+  color:rgba(246,239,223,.72); font-size:.86rem; font-weight:700;
+}
+body.site-status-loading .site-closed-card{ width:min(320px,100%); padding:30px 26px; }
+body.site-status-loading .site-closed-card img{ width:74px; margin-bottom:10px; }
 .site-closed-card{
   width:min(520px,100%); padding:42px 32px; text-align:center;
   color:var(--cream); background:rgba(246,239,223,.07);
