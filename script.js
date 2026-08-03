@@ -34,7 +34,8 @@
   }
 
   async function checkPublishedStatus() {
-    let isPublished = meta.sitePublished !== false;
+    // أمنيًا: إذا تعذر التحقق من Supabase يبقى الموقع مغلقًا بدل عرض بيانات قديمة.
+    let isPublished = false;
     try {
       const config = window.MOKHBITEEN_SUPABASE;
       if (config) {
@@ -51,6 +52,14 @@
     }
     document.body.classList.remove("site-status-loading", "site-closed");
     if (!isPublished) document.body.classList.add("site-closed");
+  }
+
+  if (!isPrivatePreview) {
+    // مزامنة التبويبات المفتوحة مسبقًا دون حاجة إلى تحديث الصفحة يدويًا.
+    setInterval(checkPublishedStatus, 15000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) checkPublishedStatus();
+    });
   }
   const closedEyebrow = document.querySelector(".site-closed-eyebrow");
   if (closedEyebrow) closedEyebrow.textContent = meta.projectName;
