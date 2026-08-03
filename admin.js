@@ -20,7 +20,6 @@
      حماية قوية بمستوى خادم حقيقي — لا تستخدمها لبيانات حساسة جدًا.
   --------------------------------------------------------------------- */
   const ADMIN_PASSWORD_HASH = "28710d9171458c30b4a85ec6f7d481463bfda0da1897f7740a1ede970d31f3ad";
-  const UNLOCK_KEY = "mokhbiteen_admin_unlocked_v1";
 
   async function sha256(text) {
     const enc = new TextEncoder().encode(text);
@@ -33,17 +32,25 @@
   const lockForm = document.getElementById("lockForm");
   const lockInput = document.getElementById("lockPasswordInput");
   const lockError = document.getElementById("lockError");
+  let adminInitialized = false;
 
   function unlock() {
     lockOverlay.style.display = "none";
     adminContent.classList.remove("admin-hidden");
-    try { sessionStorage.setItem(UNLOCK_KEY, "1"); } catch (e) {}
+    lockError.textContent = "";
+    lockInput.value = "";
+    if (!adminInitialized) {
+      adminInitialized = true;
+      initAdminPanel();
+    }
   }
 
-  // إن كان قد تم فتح القفل مسبقًا في هذه الجلسة، لا داعي لطلب كلمة المرور مجددًا
-  try {
-    if (sessionStorage.getItem(UNLOCK_KEY) === "1") unlock();
-  } catch (e) {}
+  function lockAdmin() {
+    adminContent.classList.add("admin-hidden");
+    lockOverlay.style.display = "flex";
+    lockError.textContent = "";
+    lockInput.value = "";
+  }
 
   lockForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -65,18 +72,16 @@
     }
   });
 
-  // إن لم يُفتح القفل، أوقف تنفيذ بقية الصفحة هنا
-  if (adminContent.classList.contains("admin-hidden")) {
-    // ننتظر فتح القفل قبل تشغيل بقية لوحة التحكم
-    var waitForUnlock = setInterval(() => {
-      if (!adminContent.classList.contains("admin-hidden")) {
-        clearInterval(waitForUnlock);
-        initAdminPanel();
-      }
-    }, 200);
-  } else {
-    initAdminPanel();
-  }
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    lockAdmin();
+    lockInput.focus();
+  });
+
+  // قفل الصفحة عند مغادرتها، بما في ذلك العودة للموقع العام وزر الرجوع في المتصفح.
+  window.addEventListener("pagehide", lockAdmin);
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) lockAdmin();
+  });
 
   function initAdminPanel() {
 
