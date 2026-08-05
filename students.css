@@ -41,7 +41,9 @@ main{width:min(1180px,92%);margin:auto;padding:58px 0 80px}
 .student-record:before{content:"";position:absolute;inset:16px;border:1px solid rgba(201,162,75,.28);border-radius:18px 4px 4px 18px;pointer-events:none}
 .record-watermark{position:absolute;left:5%;top:0;font-family:'Aref Ruqaa',serif;font-size:18rem;color:rgba(31,107,82,.035);line-height:1}
 .record-number{position:absolute;top:31px;left:39px;color:#9a8b6b;font-family:serif;font-size:.8rem;letter-spacing:.1em}
-.record-heading{text-align:center;position:relative;margin:38px 0 45px}
+.record-photo-wrap{width:116px;height:116px;margin:16px auto 0;padding:5px;border:1px solid var(--gold);border-radius:50%;position:relative;background:var(--paper);box-shadow:0 10px 28px rgba(20,40,50,.15)}
+.record-photo{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 20%}
+.record-heading{text-align:center;position:relative;margin:18px 0 34px}
 .record-heading h2{font-family:'Aref Ruqaa',serif;font-size:clamp(2rem,4vw,3.2rem);margin:10px 0;color:var(--green-dark)}
 .record-rule{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--gold);font-size:.52rem}
 .record-rule span{width:68px;height:1px;background:linear-gradient(to left,var(--gold),transparent)}

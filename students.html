@@ -7,7 +7,7 @@
   <title>طلاب المجموعة | مشروع المخبتين القرآني</title>
   <link rel="icon" href="assets/logo.png" type="image/png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="students.css?v=20260805-4">
+  <link rel="stylesheet" href="students.css?v=20260805-6">
 </head>
 <body class="directory-status-loading">
   <div class="directory-pattern" aria-hidden="true"></div>
@@ -66,6 +66,9 @@
       <article class="student-record" id="studentRecord" aria-live="polite">
         <div class="record-watermark" aria-hidden="true">﴿</div>
         <div class="record-number" id="recordNumber">الطالب 01</div>
+        <div class="record-photo-wrap">
+          <img id="recordPhoto" class="record-photo" src="" alt="">
+        </div>
         <div class="record-heading">
           <span>سجل طالب</span>
           <h2 id="recordName"></h2>
@@ -73,8 +76,8 @@
         </div>
         <dl class="record-details">
           <div>
-            <dt><i class="fa-regular fa-calendar"></i> سنة الميلاد</dt>
-            <dd id="recordBirth"></dd>
+            <dt><i class="fa-regular fa-calendar"></i> العمر</dt>
+            <dd id="recordAge"></dd>
           </div>
           <div>
             <dt><i class="fa-solid fa-book-quran"></i> مقدار الحفظ</dt>
@@ -102,7 +105,7 @@
   </footer>
 
   <script src="supabase-config.js?v=20260805-4"></script>
-  <script src="group-students.js?v=20260805-4"></script>
-  <script src="students.js?v=20260805-5"></script>
+  <script src="group-students.js?v=20260805-6"></script>
+  <script src="students.js?v=20260805-6"></script>
 </body>
 </html>

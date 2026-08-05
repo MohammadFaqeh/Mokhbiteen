@@ -76,9 +76,13 @@
     const student = students[index];
     document.getElementById("recordNumber").textContent = `الطالب ${String(index + 1).padStart(2, "0")}`;
     document.getElementById("recordName").textContent = student.name;
-    document.getElementById("recordBirth").textContent = student.birthYear;
+    const age = new Date().getFullYear() - student.birthYear;
+    document.getElementById("recordAge").textContent = `${age} عامًا`;
     document.getElementById("recordMemorization").textContent = juzLabel(student.memorization);
     document.getElementById("recordTajweed").textContent = student.tajweed;
+    const photo = document.getElementById("recordPhoto");
+    photo.src = student.image;
+    photo.alt = `صورة الطالب ${student.name}`;
     renderRoster();
     if (updateHash) history.replaceState(null, "", `#student-${index + 1}`);
   }
