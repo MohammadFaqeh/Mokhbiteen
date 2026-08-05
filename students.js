@@ -64,7 +64,7 @@
     rosterList.innerHTML = visibleIndices.map((studentIndex) => {
       const student = students[studentIndex];
       const selected = studentIndex === activeIndex;
-      return `<button type="button" class="roster-item${selected ? " is-active" : "}" data-index="${studentIndex}" aria-pressed="${selected}">
+      return `<button type="button" class="roster-item${selected ? " is-active" : ""}" data-index="${studentIndex}" aria-pressed="${selected}">
         <span>${String(studentIndex + 1).padStart(2, "0")}</span><strong>${student.name}</strong><i class="fa-solid fa-chevron-left"></i>
       </button>`;
     }).join("");
