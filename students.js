@@ -31,12 +31,15 @@
 
   async function checkPublishedStatus() {
     let published = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     try {
       const config = window.MOKHBITEEN_SUPABASE;
       if (config) {
-        const response = await fetch(`${config.url}/rest/v1/site_settings?select=is_published&id=eq.main`, {
+        const response = await fetch(`${config.url}/rest/v1/site_settings?select=is_published&id=eq.main&limit=1`, {
           headers: { apikey: config.publishableKey },
-          cache: "no-store"
+          cache: "no-store",
+          signal: controller.signal
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const rows = await response.json();
@@ -44,6 +47,8 @@
       }
     } catch (error) {
       console.error("تعذر التحقق من حالة نشر الموقع:", error);
+    } finally {
+      clearTimeout(timeout);
     }
     document.body.classList.remove("directory-status-loading", "directory-closed-mode");
     if (!published) document.body.classList.add("directory-closed-mode");
