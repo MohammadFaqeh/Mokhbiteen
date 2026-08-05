@@ -79,7 +79,14 @@
     const age = new Date().getFullYear() - student.birthYear;
     document.getElementById("recordAge").textContent = `${age} عامًا`;
     document.getElementById("recordMemorization").textContent = juzLabel(student.memorization);
-    document.getElementById("recordTajweed").textContent = student.tajweed;
+    const tajweedList = document.getElementById("recordTajweed");
+    if (student.tajweed === "لا شيء") {
+      tajweedList.innerHTML = '<li class="tajweed-empty"><i class="fa-regular fa-clock"></i><span>لم يحصل على دورات بعد</span></li>';
+    } else {
+      tajweedList.innerHTML = student.tajweed.split("+").map((course) =>
+        `<li><i class="fa-solid fa-circle-check"></i><span>${course.trim()}</span></li>`
+      ).join("");
+    }
     const photo = document.getElementById("recordPhoto");
     photo.src = student.image;
     photo.alt = `صورة الطالب ${student.name}`;

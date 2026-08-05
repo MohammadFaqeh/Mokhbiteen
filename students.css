@@ -54,6 +54,11 @@ main{width:min(1180px,92%);margin:auto;padding:58px 0 80px}
 .record-details dt i{color:var(--green);width:22px}
 .record-details dd{font-family:'Aref Ruqaa',serif;font-weight:700;font-size:1.45rem;color:var(--ink)}
 .record-details .record-wide{grid-column:1/-1}
+.tajweed-list{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin-top:3px}
+.tajweed-list li{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:rgba(31,107,82,.09);color:var(--green-dark);font-family:'Tajawal',sans-serif;font-size:.94rem;font-weight:700}
+.tajweed-list li i{color:var(--green);font-size:.82rem}
+.tajweed-list .tajweed-empty{background:rgba(100,113,110,.08);color:var(--muted);font-weight:500}
+.tajweed-list .tajweed-empty i{color:#9a8b6b}
 .student-record blockquote{text-align:center;color:var(--green);font-family:'Aref Ruqaa',serif;font-size:1.2rem;margin:auto 0 22px;padding-top:28px}
 .record-nav{display:flex;justify-content:center;gap:10px;position:relative}
 .record-nav button{border:1px solid var(--line);background:transparent;color:var(--green);border-radius:999px;padding:9px 16px;cursor:pointer;font-weight:700}
