@@ -635,63 +635,46 @@ section{ position:relative; padding:100px 5%; }
 .timeline-btn:hover{ background:var(--gold-light); color:var(--navy-deep); }
 
 /* ===================== مدخل سجل طلاب المجموعة ===================== */
-.group-directory-invite{
-  padding:34px 5%;
-  background:var(--cream);
-}
-.group-directory-inner{
-  width:min(1120px,100%);
-  margin:auto;
+.hero-students-entry{
+  position:relative;z-index:2;
+  width:min(450px,88%);
+  margin:26px auto 16px;
+  padding:11px 15px;
   display:grid;
-  grid-template-columns:76px 1fr auto;
+  grid-template-columns:48px 1fr 28px;
   align-items:center;
-  gap:24px;
-  padding:28px 32px;
+  gap:12px;
   color:var(--cream);
-  background:linear-gradient(125deg,var(--navy),#214e4c);
-  border:1px solid rgba(201,162,75,.55);
-  border-radius:22px;
-  box-shadow:0 14px 34px rgba(20,40,50,.16);
-  position:relative;
-  overflow:hidden;
-}
-.group-directory-inner:after{
-  content:"﴿";
-  position:absolute;
-  left:25%;top:-75px;
-  color:rgba(229,198,111,.07);
-  font-family:var(--font-display);
-  font-size:13rem;
-}
-.group-directory-mark{
-  width:70px;height:70px;
+  text-decoration:none;
+  text-align:right;
+  background:rgba(14,37,43,.52);
   border:1px solid rgba(229,198,111,.5);
-  border-radius:50%;
+  border-radius:17px;
+  box-shadow:0 12px 30px rgba(0,0,0,.16);
+  backdrop-filter:blur(8px);
+  transition:.22s;
+}
+.hero-students-entry:hover{
+  transform:translateY(-3px);
+  background:rgba(31,107,82,.72);
+  border-color:var(--gold-light);
+}
+.hero-students-icon{
+  width:46px;height:46px;
   display:grid;place-items:center;
-  color:var(--gold-light);
-  font-size:1.55rem;
+  border-radius:13px;
+  background:var(--gold-light);
+  color:var(--navy-deep);
+  font-size:1.15rem;
 }
-.group-directory-copy{position:relative;z-index:1}
-.group-directory-copy span{color:var(--gold-light);font-size:.78rem;font-weight:800;letter-spacing:.08em}
-.group-directory-copy h2{font-family:var(--font-display);font-size:1.8rem;margin:3px 0 5px}
-.group-directory-copy p{color:rgba(246,239,223,.7);font-size:.9rem;line-height:1.7}
-.group-directory-link{
-  position:relative;z-index:1;
-  display:flex;align-items:center;gap:9px;
-  text-decoration:none;white-space:nowrap;
-  color:var(--navy);background:var(--gold-light);
-  font-weight:800;font-size:.9rem;
-  padding:13px 20px;border-radius:999px;
-  transition:.2s;
-}
-.group-directory-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
-@media(max-width:760px){
-  .group-directory-invite{padding:24px 4%}
-  .group-directory-inner{grid-template-columns:56px 1fr;padding:23px 20px;gap:14px}
-  .group-directory-mark{width:54px;height:54px;font-size:1.2rem}
-  .group-directory-copy h2{font-size:1.45rem}
-  .group-directory-copy p{font-size:.82rem}
-  .group-directory-link{grid-column:1/-1;justify-content:center;margin-top:4px}
+.hero-students-copy{display:flex;flex-direction:column;line-height:1.45}
+.hero-students-copy small{color:rgba(246,239,223,.64);font-size:.72rem}
+.hero-students-copy strong{color:#fff;font-family:var(--font-display);font-size:1.2rem}
+.hero-students-arrow{color:var(--gold-light);font-size:.9rem}
+@media(max-width:520px){
+  .hero-students-entry{grid-template-columns:42px 1fr 20px;padding:9px 11px;margin-top:20px}
+  .hero-students-icon{width:40px;height:40px}
+  .hero-students-copy strong{font-size:1.02rem}
 }
 
 /* ===================== بطاقات الطلاب ===================== */
