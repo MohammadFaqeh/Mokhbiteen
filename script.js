@@ -29,6 +29,10 @@
   if (isPrivatePreview) {
     document.body.classList.remove("site-status-loading");
     document.body.classList.add("preview-mode");
+    ["groupStudentsNavLink", "groupStudentsHeroLink"].forEach((id) => {
+      const link = document.getElementById(id);
+      if (link) link.href = "students.html?preview=1";
+    });
   } else {
     checkPublishedStatus();
   }

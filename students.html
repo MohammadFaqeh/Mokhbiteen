@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="سجل طلاب مشروع المخبتين القرآني ومقدار الحفظ ودورات التجويد">
+  <title>طلاب المجموعة | مشروع المخبتين القرآني</title>
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="students.css?v=20260805-1">
+</head>
+<body class="directory-status-loading">
+  <div class="directory-pattern" aria-hidden="true"></div>
+
+  <div class="directory-closed" id="directoryClosed" aria-live="polite">
+    <div class="directory-closed-card">
+      <img src="assets/logo.png" alt="شعار مشروع المخبتين">
+      <span>مشروع المخبتين القرآني</span>
+      <h1>يجري تجهيز الموقع</h1>
+      <p>نعمل حاليًا على إعداد البيانات وتدقيقها، ونلتقي بكم قريبًا.</p>
+      <a href="admin.html"><i class="fa-solid fa-lock"></i> دخول الإدارة</a>
+      <small>تصميم وتطوير م. محمد الفقيه</small>
+    </div>
+  </div>
+
+  <div class="directory-preview" id="directoryPreview">
+    <i class="fa-solid fa-eye"></i> معاينة إدارية — هذه الصفحة غير ظاهرة للزوار الآن
+    <a href="admin.html">العودة إلى لوحة التحكم</a>
+  </div>
+
+  <nav class="directory-nav">
+    <a class="directory-brand" href="index.html" id="homeLink">
+      <img src="assets/logo.png" alt="شعار المشروع">
+      <span>مشروع المخبتين القرآني</span>
+    </a>
+    <a class="directory-back" href="index.html" id="backLink"><i class="fa-solid fa-arrow-right"></i> العودة إلى الموقع</a>
+  </nav>
+
+  <main>
+    <header class="directory-hero">
+      <span class="directory-kicker">سجل المجموعة</span>
+      <h1>طلاب مشروع المخبتين</h1>
+      <p>تعرّف على طلاب المجموعة ومسيرتهم في حفظ كتاب الله وتعلّم أحكام تلاوته.</p>
+      <div class="directory-count"><strong id="studentsCount">13</strong><span>طالبًا في المجموعة</span></div>
+    </header>
+
+    <section class="directory-shell" aria-label="سجل طلاب المجموعة">
+      <aside class="directory-roster">
+        <div class="roster-heading">
+          <div><span>الفهرس</span><h2>أسماء الطلاب</h2></div>
+          <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+        </div>
+        <label class="roster-search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input id="studentSearch" type="search" placeholder="ابحث عن اسم طالب" autocomplete="off">
+        </label>
+        <div class="roster-list" id="rosterList"></div>
+        <p class="roster-empty" id="rosterEmpty">لا يوجد طالب بهذا الاسم.</p>
+      </aside>
+
+      <article class="student-record" id="studentRecord" aria-live="polite">
+        <div class="record-watermark" aria-hidden="true">﴿</div>
+        <div class="record-number" id="recordNumber">الطالب 01</div>
+        <div class="record-heading">
+          <span>سجل طالب</span>
+          <h2 id="recordName"></h2>
+          <div class="record-rule"><span></span><i class="fa-solid fa-diamond"></i><span></span></div>
+        </div>
+        <dl class="record-details">
+          <div>
+            <dt><i class="fa-regular fa-calendar"></i> سنة الميلاد</dt>
+            <dd id="recordBirth"></dd>
+          </div>
+          <div>
+            <dt><i class="fa-solid fa-book-quran"></i> مقدار الحفظ</dt>
+            <dd id="recordMemorization"></dd>
+          </div>
+          <div class="record-wide">
+            <dt><i class="fa-solid fa-graduation-cap"></i> دورات التجويد الحاصل عليها</dt>
+            <dd id="recordTajweed"></dd>
+          </div>
+        </dl>
+        <blockquote>«خيركم من تعلم القرآن وعلمه»</blockquote>
+        <div class="record-nav">
+          <button type="button" id="nextStudent"><i class="fa-solid fa-arrow-right"></i> التالي</button>
+          <button type="button" id="previousStudent">السابق <i class="fa-solid fa-arrow-left"></i></button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <img src="assets/logo.png" alt="شعار المشروع">
+    <p>مشروع المخبتين القرآني</p>
+    <small>تصميم وتطوير <strong>م. محمد الفقيه</strong></small>
+    <a href="admin.html">لوحة التحكم</a>
+  </footer>
+
+  <script src="supabase-config.js?v=20260803-5"></script>
+  <script src="group-students.js?v=20260805-1"></script>
+  <script src="students.js?v=20260805-1"></script>
+</body>
+</html>
