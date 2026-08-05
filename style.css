@@ -669,7 +669,7 @@ section{ position:relative; padding:100px 5%; }
 }
 .hero-students-copy{display:flex;flex-direction:column;line-height:1.45}
 .hero-students-copy small{color:rgba(246,239,223,.64);font-size:.72rem}
-.hero-students-copy strong{color:#fff;font-family:var(--font-display);font-size:1.2rem}
+.hero-students-copy strong{color:#fff;font-family:var(--font-body);font-size:1.12rem;font-weight:800;letter-spacing:0}
 .hero-students-arrow{color:var(--gold-light);font-size:.9rem}
 @media(max-width:520px){
   .hero-students-entry{grid-template-columns:42px 1fr 20px;padding:9px 11px;margin-top:20px}
