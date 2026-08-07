@@ -12,6 +12,10 @@ create table if not exists public.honor_board_archives (
 
 alter table public.honor_board_archives enable row level security;
 
+-- الصلاحيات الأساسية للواجهة العامة ولحساب الإدارة
+grant select on table public.honor_board_archives to anon, authenticated;
+grant insert, update, delete on table public.honor_board_archives to authenticated;
+
 drop policy if exists "Public can read honor board archives" on public.honor_board_archives;
 create policy "Public can read honor board archives"
 on public.honor_board_archives for select

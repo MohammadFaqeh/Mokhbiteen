@@ -1,6 +1,6 @@
 // بيانات مشروع المخبتين القرآني - شهر 7
 // يمكن تعديل أي قيمة هنا مباشرة
-const MOKHBITEEN_DATA = {
+window.MOKHBITEEN_DATA = {
   "meta": {
     "projectName": "مشروع المخبتين القرآني",
     "monthLabel": "شهر 7",

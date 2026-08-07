@@ -77,13 +77,36 @@
     if (e.persisted) lockAdmin();
   });
 
-  function initAdminPanel() {
+  async function initAdminPanel() {
 
   const STORAGE_KEY = "mokhbiteen_draft_data_v2";
   const WEIGHTS = { attendance: 0.10, memorization: 0.30, revision: 0.30, worship: 0.20, evaluation: 0.10 };
 
-  // تحميل نسخة العمل: من التخزين المحلي إن وجدت، وإلا من data.js الأصلي
-  let workingData = loadDraft() || JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
+  const liveSaveState = document.getElementById("liveSaveState");
+
+  async function loadRemoteBoard() {
+    if (!supabaseClient) return null;
+    const { data, error } = await supabaseClient
+      .from("live_board")
+      .select("data,updated_at")
+      .eq("id", "main")
+      .maybeSingle();
+    if (error) {
+      console.warn("تعذر تحميل البيانات المباشرة:", error);
+      liveSaveState.textContent = "قاعدة البيانات المباشرة غير مهيأة بعد — شغّل ملف supabase-live-data-setup.sql.";
+      liveSaveState.style.color = "#b8563f";
+      return null;
+    }
+    if (data?.data) {
+      liveSaveState.textContent = `تم تحميل آخر نسخة من الموقع — ${new Date(data.updated_at).toLocaleString("ar-JO")}`;
+      return data.data;
+    }
+    liveSaveState.textContent = "لا توجد بيانات مباشرة بعد؛ أول عملية حفظ سترفع اللوحة الحالية إلى Supabase.";
+    return null;
+  }
+
+  // Supabase هو المصدر الأساسي، والمسودة المحلية وdata.js احتياط فقط.
+  let workingData = await loadRemoteBoard() || loadDraft() || JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
   let activeDayIndex = 0;
   if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
   if (workingData.meta.sitePublished === undefined) workingData.meta.sitePublished = true;
@@ -593,6 +616,266 @@
     if (dayIdx === undefined || !field) return;
     workingData.days[dayIdx][field] = e.target.value;
     saveDraft();
+  });
+
+  /* ---------------------------------------------------------------------
+     الحفظ المباشر وExcel
+  --------------------------------------------------------------------- */
+  const saveLiveDataBtn = document.getElementById("saveLiveDataBtn");
+  const excelImportInput = document.getElementById("excelImportInput");
+  const excelImportPreview = document.getElementById("excelImportPreview");
+  const downloadCumulativeExcelBtn = document.getElementById("downloadCumulativeExcelBtn");
+  let pendingExcelData = null;
+
+  async function saveLiveBoard() {
+    if (!supabaseClient) throw new Error("Supabase unavailable");
+    recalcAllAndRank();
+    saveDraft();
+    const snapshot = JSON.parse(JSON.stringify(workingData));
+    const { error } = await supabaseClient.from("live_board").upsert({
+      id: "main",
+      data: snapshot,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "id" });
+    if (error) throw error;
+  }
+
+  saveLiveDataBtn.addEventListener("click", async () => {
+    saveLiveDataBtn.disabled = true;
+    saveLiveDataBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الحفظ...';
+    try {
+      await saveLiveBoard();
+      liveSaveState.style.color = "var(--emerald)";
+      liveSaveState.textContent = `تم الحفظ على الموقع — ${new Date().toLocaleString("ar-JO")}`;
+      showToast("تم حفظ التعديلات على الموقع مباشرة");
+    } catch (error) {
+      console.error("تعذر حفظ البيانات المباشرة:", error);
+      liveSaveState.style.color = "#b8563f";
+      liveSaveState.textContent = "فشل الحفظ — تأكد من تشغيل ملف إعداد قاعدة البيانات الجديدة.";
+      showToast("لم يتم الحفظ على الموقع");
+    } finally {
+      saveLiveDataBtn.disabled = false;
+      saveLiveDataBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات على الموقع';
+    }
+  });
+
+  function excelCellText(cell) {
+    const value = cell?.value;
+    if (value && typeof value === "object" && Array.isArray(value.richText)) return value.richText.map((part) => part.text).join("");
+    return String(value ?? "").trim();
+  }
+
+  function parseImportedWorkbook(workbook) {
+    const sheet = workbook.worksheets[0];
+    if (!sheet) throw new Error("ملف Excel لا يحتوي ورقة بيانات");
+    const monthLabel = excelCellText(sheet.getCell("B2"));
+    const year = Number(sheet.getCell("D2").value);
+    if (!monthLabel || !year) throw new Error("لم أجد اسم الشهر والسنة في B2 وD2");
+
+    const meetingGroups = [];
+    let col = 3;
+    while (col <= sheet.columnCount) {
+      const title = excelCellText(sheet.getCell(4, col));
+      if (!title.startsWith("اللقاء")) break;
+      const dateMatch = title.match(/\(([^)]+)\)/);
+      meetingGroups.push({ startCol: col, date: dateMatch ? dateMatch[1] : "", meetingNumber: meetingGroups.length + 1 });
+      col += 6;
+    }
+    if (!meetingGroups.length) throw new Error("لم أجد أعمدة اللقاءات في الصف الرابع");
+
+    const importedStudents = [];
+    for (let row = 6; row <= sheet.rowCount; row++) {
+      const name = excelCellText(sheet.getCell(row, 2));
+      if (!name) continue;
+      const existing = workingData.students.find((student) => normalizeName(student.name) === normalizeName(name));
+      const studentDays = meetingGroups.map((meeting) => ({
+        date: meeting.date,
+        attendance: clampScore(sheet.getCell(row, meeting.startCol).value),
+        memorization: clampScore(sheet.getCell(row, meeting.startCol + 1).value),
+        revision: clampScore(sheet.getCell(row, meeting.startCol + 2).value),
+        worship: clampScore(sheet.getCell(row, meeting.startCol + 3).value),
+        evaluation: clampScore(sheet.getCell(row, meeting.startCol + 4).value),
+        dayAverage: 0
+      }));
+      importedStudents.push({
+        id: existing?.id ?? row - 5,
+        name,
+        photo: existing?.photo || "assets/logo.png",
+        final: 0, attendance: 0, memorization: 0, revision: 0, worship: 0, evaluation: 0,
+        days: studentDays,
+        rank: row - 5
+      });
+    }
+    if (!importedStudents.length) throw new Error("لم أجد أسماء طلاب ابتداءً من الصف السادس");
+
+    const importedDays = meetingGroups.map((meeting) => ({
+      id: `${year}-${meeting.meetingNumber}`,
+      date: meeting.date,
+      meetingNumber: meeting.meetingNumber,
+      groupAverage: 0,
+      presentCount: 0,
+      totalCount: importedStudents.length,
+      achievement: "----",
+      nextRequired: "----",
+      note: "",
+      motivation: ""
+    }));
+    const imported = JSON.parse(JSON.stringify(workingData));
+    imported.meta.monthLabel = monthLabel;
+    imported.meta.year = String(year);
+    imported.meta.heroTitle = `لوحة شرف ${monthLabel}`;
+    imported.days = importedDays;
+    imported.students = importedStudents;
+    return imported;
+  }
+
+  function normalizeName(value) {
+    return String(value || "").trim().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, " ");
+  }
+  function clampScore(value) { return Math.max(0, Math.min(100, Number(value) || 0)); }
+
+  excelImportInput.addEventListener("change", async () => {
+    const file = excelImportInput.files?.[0];
+    if (!file) return;
+    pendingExcelData = null;
+    excelImportPreview.classList.add("is-visible");
+    excelImportPreview.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ قراءة الملف والتحقق منه...';
+    try {
+      if (!window.ExcelJS) throw new Error("تعذر تحميل قارئ Excel");
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(await file.arrayBuffer());
+      pendingExcelData = parseImportedWorkbook(workbook);
+      excelImportPreview.innerHTML = `
+        <b><i class="fa-solid fa-circle-check" style="color:var(--emerald)"></i> الملف صالح للاستيراد</b><br>
+        الشهر: ${escapeAttr(pendingExcelData.meta.monthLabel)} — السنة: ${escapeAttr(pendingExcelData.meta.year)}<br>
+        الطلاب: ${pendingExcelData.students.length} — اللقاءات: ${pendingExcelData.days.length}<br>
+        <button type="button" class="btn btn-teal btn-sm" id="confirmExcelImportBtn" style="margin-top:12px"><i class="fa-solid fa-check"></i> اعتماد البيانات في لوحة التحكم</button>`;
+    } catch (error) {
+      console.error("تعذر استيراد Excel:", error);
+      excelImportPreview.innerHTML = `<b style="color:#b8563f"><i class="fa-solid fa-triangle-exclamation"></i> لم يتم قبول الملف</b><br>${escapeAttr(error.message)}`;
+    }
+    excelImportInput.value = "";
+  });
+
+  excelImportPreview.addEventListener("click", (event) => {
+    if (!event.target.closest("#confirmExcelImportBtn") || !pendingExcelData) return;
+    if (!confirm(`سيتم استبدال مسودة لوحة التحكم ببيانات ${pendingExcelData.meta.monthLabel}. لن تُنشر حتى تضغط حفظ التعديلات على الموقع. هل تريد المتابعة؟`)) return;
+    workingData = pendingExcelData;
+    activeDayIndex = 0;
+    recalcAllAndRank();
+    saveDraft();
+    renderAll();
+    excelImportPreview.innerHTML = '<b style="color:var(--emerald)"><i class="fa-solid fa-circle-check"></i> تم اعتماد الملف كمسودة. راجع النتائج ثم اضغط حفظ التعديلات على الموقع.</b>';
+    showToast("تم استيراد Excel إلى المسودة");
+  });
+
+  function safeSheetName(value, usedNames) {
+    const base = String(value || "شهر").replace(/[\\/*?:\[\]]/g, "-").slice(0, 28) || "شهر";
+    let name = base, counter = 2;
+    while (usedNames.has(name)) name = `${base.slice(0, 25)}-${counter++}`;
+    usedNames.add(name);
+    return name;
+  }
+
+  function addMonthWorksheet(workbook, monthData, usedNames) {
+    const meta = monthData.meta || {};
+    const days = monthData.days || [];
+    const students = [...(monthData.students || [])].sort((a, b) => (a.rank || 999) - (b.rank || 999));
+    const sheet = workbook.addWorksheet(safeSheetName(`${meta.monthLabel || "شهر"}-${meta.year || ""}`, usedNames), { views: [{ rightToLeft: true, state: "frozen", ySplit: 5, xSplit: 2 }] });
+    const totalCols = 2 + days.length * 6 + 6;
+    sheet.mergeCells(1, 1, 1, totalCols);
+    sheet.getCell(1, 1).value = `${meta.projectName || "مشروع المخبتين القرآني"} — ${meta.heroTitle || meta.monthLabel || "لوحة الشرف"}`;
+    sheet.getCell(2, 1).value = "الشهر"; sheet.getCell(2, 2).value = meta.monthLabel || "";
+    sheet.getCell(2, 3).value = "السنة"; sheet.getCell(2, 4).value = Number(meta.year) || new Date().getFullYear();
+    sheet.mergeCells(4, 1, 5, 1); sheet.getCell(4, 1).value = "الترتيب";
+    sheet.mergeCells(4, 2, 5, 2); sheet.getCell(4, 2).value = "اسم الطالب";
+    const axes = ["الدوام", "الحفظ", "المراجعة", "العبادات", "التقييم", "معدل اللقاء"];
+    days.forEach((day, index) => {
+      const start = 3 + index * 6;
+      sheet.mergeCells(4, start, 4, start + 5);
+      sheet.getCell(4, start).value = `اللقاء ${index + 1} (${day.date || "--/--"})`;
+      axes.forEach((axis, axisIndex) => sheet.getCell(5, start + axisIndex).value = axis);
+    });
+    const monthlyStart = 3 + days.length * 6;
+    sheet.mergeCells(4, monthlyStart, 4, monthlyStart + 5);
+    sheet.getCell(4, monthlyStart).value = "معدلات الشهر";
+    ["متوسط الدوام", "متوسط الحفظ", "متوسط المراجعة", "متوسط العبادات", "متوسط التقييم", "المعدل النهائي"].forEach((axis, index) => sheet.getCell(5, monthlyStart + index).value = axis);
+
+    students.forEach((student, studentIndex) => {
+      const row = 6 + studentIndex;
+      sheet.getCell(row, 1).value = student.rank || studentIndex + 1;
+      sheet.getCell(row, 2).value = student.name;
+      days.forEach((day, dayIndex) => {
+        const start = 3 + dayIndex * 6;
+        const score = student.days?.[dayIndex] || {};
+        [score.attendance, score.memorization, score.revision, score.worship, score.evaluation].forEach((value, index) => sheet.getCell(row, start + index).value = Number(value) || 0);
+        sheet.getCell(row, start + 5).value = { formula: `${sheet.getCell(row,start).address}*10%+${sheet.getCell(row,start+1).address}*30%+${sheet.getCell(row,start+2).address}*30%+${sheet.getCell(row,start+3).address}*20%+${sheet.getCell(row,start+4).address}*10%`, result: Number(score.dayAverage) || 0 };
+      });
+      for (let axisIndex = 0; axisIndex < 5; axisIndex++) {
+        const refs = days.map((_, dayIndex) => sheet.getCell(row, 3 + dayIndex * 6 + axisIndex).address);
+        sheet.getCell(row, monthlyStart + axisIndex).value = { formula: `AVERAGE(${refs.join(",")})`, result: Number(student[["attendance","memorization","revision","worship","evaluation"][axisIndex]]) || 0 };
+      }
+      sheet.getCell(row, monthlyStart + 5).value = { formula: `${sheet.getCell(row,monthlyStart).address}*10%+${sheet.getCell(row,monthlyStart+1).address}*30%+${sheet.getCell(row,monthlyStart+2).address}*30%+${sheet.getCell(row,monthlyStart+3).address}*20%+${sheet.getCell(row,monthlyStart+4).address}*10%`, result: Number(student.final) || 0 };
+    });
+
+    sheet.getRow(1).height = 34; sheet.getRow(4).height = 28; sheet.getRow(5).height = 34;
+    sheet.getColumn(1).width = 10; sheet.getColumn(2).width = 28;
+    for (let colIndex = 3; colIndex <= totalCols; colIndex++) sheet.getColumn(colIndex).width = 13;
+    sheet.getCell(1,1).font = { name: "Arial", size: 16, bold: true, color: { argb: "FFFFFFFF" } };
+    sheet.getCell(1,1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF16232C" } };
+    sheet.getCell(1,1).alignment = { horizontal: "center", vertical: "middle" };
+    [4,5].forEach((row) => sheet.getRow(row).eachCell((cell) => {
+      cell.font = { name: "Arial", bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row === 4 ? "FF1F6B52" : "FF2B7A62" } };
+      cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    }));
+    if (students.length) {
+      const dataRangeRows = students.length + 5;
+      for (let row = 6; row <= dataRangeRows; row++) {
+        sheet.getRow(row).height = 23;
+        for (let colIndex = 1; colIndex <= totalCols; colIndex++) {
+          const cell = sheet.getCell(row, colIndex);
+          cell.alignment = { horizontal: colIndex === 2 ? "right" : "center", vertical: "middle" };
+          cell.border = { bottom: { style: "thin", color: { argb: "FFE1E7E3" } } };
+          if (colIndex >= 3) cell.numFmt = "0.0";
+        }
+      }
+    }
+    sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+    return sheet;
+  }
+
+  async function downloadWorkbook(workbook, filename) {
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob); link.download = filename; link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+
+  downloadCumulativeExcelBtn.addEventListener("click", async () => {
+    if (!window.ExcelJS || !supabaseClient) return showToast("تعذر تشغيل تصدير Excel");
+    downloadCumulativeExcelBtn.disabled = true;
+    downloadCumulativeExcelBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ إنشاء الملف...';
+    try {
+      const { data: archives, error } = await supabaseClient.from("honor_board_archives").select("archive_key,data,year,archived_at").order("year", { ascending: true }).order("archived_at", { ascending: true });
+      if (error) throw error;
+      const months = new Map((archives || []).map((archive) => [archive.archive_key, archive.data]));
+      months.set(currentArchiveKey(), JSON.parse(JSON.stringify(workingData)));
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "مشروع المخبتين القرآني";
+      workbook.calcProperties.fullCalcOnLoad = true;
+      const usedNames = new Set();
+      months.forEach((monthData) => addMonthWorksheet(workbook, monthData, usedNames));
+      await downloadWorkbook(workbook, `أرشيف-مشروع-المخبتين-${new Date().toISOString().slice(0,10)}.xlsx`);
+      showToast("تم تنزيل ملف Excel التراكمي");
+    } catch (error) {
+      console.error("تعذر إنشاء Excel التراكمي:", error);
+      showToast("تعذر إنشاء ملف Excel");
+    } finally {
+      downloadCumulativeExcelBtn.disabled = false;
+      downloadCumulativeExcelBtn.innerHTML = '<i class="fa-solid fa-file-arrow-down"></i> تنزيل الأرشيف التراكمي Excel';
+    }
   });
 
   /* ---------------------------------------------------------------------

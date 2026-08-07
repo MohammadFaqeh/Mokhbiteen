@@ -65,7 +65,7 @@
       const student = students[studentIndex];
       const selected = studentIndex === activeIndex;
       return `<button type="button" class="roster-item${selected ? " is-active" : ""}" data-index="${studentIndex}" aria-pressed="${selected}">
-        <span>${String(studentIndex + 1).padStart(2, "0")}</span><strong>${student.name}</strong><i class="fa-solid fa-chevron-left"></i>
+        <span>${String(studentIndex + 1).padStart(2, "0")}</span><strong>${student.name}${student.memorization >= 30 ? '<small class="roster-hafiz"><i class="fa-solid fa-medal"></i> حافظ</small>' : ''}</strong><i class="fa-solid fa-chevron-left"></i>
       </button>`;
     }).join("");
     rosterEmpty.hidden = visibleIndices.length > 0;
@@ -90,6 +90,7 @@
     const photo = document.getElementById("recordPhoto");
     photo.src = student.image;
     photo.alt = `صورة الطالب ${student.name}`;
+    document.getElementById("recordHafizBadge").classList.toggle("is-visible", student.memorization >= 30);
     renderRoster();
     if (updateHash) history.replaceState(null, "", `#student-${index + 1}`);
   }

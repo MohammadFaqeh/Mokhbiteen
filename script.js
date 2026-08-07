@@ -23,6 +23,11 @@
   }
   const students = DATA.students; // مرتبون مسبقًا حسب المعدل
   const days = DATA.days;
+  const groupStudents = window.MOKHBITEEN_GROUP_STUDENTS || [];
+  function isHafiz(student) {
+    const normalized = String(student.name || "").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim();
+    return groupStudents.some((item) => String(item.name || "").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim() === normalized && Number(item.memorization) >= 30);
+  }
 
   /* مزامنة النصوص العامة مع data.js حتى تظهر تعديلات لوحة التحكم */
   const meta = DATA.meta;
@@ -366,6 +371,7 @@
     card.dataset.id = st.id;
     card.innerHTML = `
       <div class="student-rank-tag">الترتيب ${st.rank}</div>
+      ${isHafiz(st) ? '<div class="hafiz-badge"><i class="fa-solid fa-medal"></i> حافظ كتاب الله</div>' : ''}
       <div class="progress-ring-wrap">
         <svg width="104" height="104" viewBox="0 0 104 104">
           <circle class="progress-ring-bg" cx="52" cy="52" r="${RADIUS}"></circle>
@@ -402,6 +408,7 @@
         <div class="modal-avatar">${avatarInner(st)}</div>
         <div>
           <div class="modal-title">${st.name}</div>
+          ${isHafiz(st) ? '<div class="hafiz-badge"><i class="fa-solid fa-medal"></i> حافظ كتاب الله</div>' : ''}
           <div class="modal-sub">الترتيب ${st.rank} من ${students.length} — المعدل النهائي ${st.final.toFixed(1)} / 100</div>
         </div>
       </div>

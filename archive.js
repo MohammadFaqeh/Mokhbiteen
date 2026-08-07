@@ -54,11 +54,11 @@
         </section>
         <section class="archive-section">
           <div class="archive-section-head"><span>نتائج الشهر</span><h2>ترتيب الطلاب</h2></div>
-          <div class="archive-students"><table><thead><tr><th>الترتيب</th><th>الطالب</th><th>الدوام</th><th>الحفظ</th><th>المراجعة</th><th>المعدل النهائي</th></tr></thead>
+          <div class="archive-students"><table><thead><tr><th>الترتيب</th><th>الطالب</th><th>الدوام</th><th>الحفظ</th><th>المراجعة</th><th>العبادات</th><th>التقييم</th><th>المعدل النهائي</th></tr></thead>
           <tbody>${students.map((student) => `<tr>
             <td>${escapeHtml(student.rank)}</td>
             <td><div class="archive-student-name"><img src="${escapeHtml(student.photo || "assets/logo.png")}" alt=""><span>${escapeHtml(student.name)}</span></div></td>
-            <td>${number(student.attendance)}%</td><td>${number(student.memorization)}%</td><td>${number(student.revision)}%</td><td class="archive-score">${number(student.final)}%</td>
+            <td>${number(student.attendance)}%</td><td>${number(student.memorization)}%</td><td>${number(student.revision)}%</td><td>${number(student.worship)}%</td><td>${number(student.evaluation)}%</td><td class="archive-score">${number(student.final)}%</td>
           </tr>`).join("")}</tbody></table></div>
         </section>
       </div>`;

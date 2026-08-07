@@ -86,6 +86,11 @@
   .archive-admin-copy{ flex:1; min-width:240px; }
   .archive-admin-copy p{ color:var(--ink-soft); font-size:.86rem; line-height:1.8; margin:0; }
   .archive-admin-state{ margin-top:9px; font-size:.78rem; color:var(--emerald); font-weight:700; }
+  .live-data-panel{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .live-save-state{ width:100%; font-size:.8rem; color:var(--ink-soft); }
+  .excel-file-input{ display:none; }
+  .excel-preview{ display:none; margin-top:18px; padding:16px; border-radius:12px; background:var(--cream-soft); color:var(--navy-deep); font-size:.84rem; line-height:1.8; }
+  .excel-preview.is-visible{ display:block; }
   pre#exportPreview{
     max-height:280px; overflow:auto; background:var(--navy-deep); color:#dce8e0;
     padding:16px; border-radius:12px; font-size:.72rem; display:none;
@@ -160,9 +165,20 @@
 
   <div class="admin-note">
     <i class="fa-solid fa-circle-info"></i>
-    هذه الصفحة لتعديل بيانات الطلاب وأيام الدوام محليًا في المتصفح دون أي قاعدة بيانات.
-    بعد الانتهاء من التعديل اضغط <b>"تصدير data.js"</b> لتنزيل ملف البيانات المحدّث، ثم استبدل به ملف
-    <code>data.js</code> في مجلد المشروع لتظهر التعديلات في الموقع العام.
+    هذه الصفحة تعدّل بيانات لوحة الشرف مباشرة عبر Supabase. عدّل البيانات ثم اضغط
+    <b>"حفظ التعديلات على الموقع"</b> لتظهر للزوار دون استبدال <code>data.js</code>.
+  </div>
+
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-cloud-arrow-up"></i> الحفظ المباشر وExcel</h2>
+    <div class="live-data-panel">
+      <button class="btn btn-teal btn-sm" id="saveLiveDataBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات على الموقع</button>
+      <label class="btn btn-outline btn-sm" style="color:var(--emerald);border-color:var(--emerald);cursor:pointer" for="excelImportInput"><i class="fa-solid fa-file-excel"></i> استيراد شهر من Excel</label>
+      <input class="excel-file-input" type="file" id="excelImportInput" accept=".xlsx">
+      <button class="btn btn-gold btn-sm" id="downloadCumulativeExcelBtn"><i class="fa-solid fa-file-arrow-down"></i> تنزيل الأرشيف التراكمي Excel</button>
+      <div class="live-save-state" id="liveSaveState">سيتم تحميل آخر بيانات محفوظة في Supabase بعد تسجيل الدخول.</div>
+    </div>
+    <div class="excel-preview" id="excelImportPreview"></div>
   </div>
 
   <div class="admin-card">
@@ -253,8 +269,9 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="supabase-config.js?v=20260803-3"></script>
-<script src="data.js?v=20260803-3"></script>
-<script src="admin.js?v=20260807-10"></script>
+<script src="data.js?v=20260807-12"></script>
+<script src="admin.js?v=20260807-12"></script>
 </body>
 </html>
