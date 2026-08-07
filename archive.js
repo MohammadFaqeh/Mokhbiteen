@@ -6,6 +6,10 @@
     return String(value ?? "").replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
   }
   function number(value) { return Number(value || 0).toFixed(1); }
+  function meetingText(value) {
+    const text = String(value || "").trim();
+    return !text || text.startsWith("يُضاف") ? "----" : text;
+  }
 
   function renderArchive(row) {
     const data = row.data;
@@ -43,8 +47,8 @@
             <article class="archive-meeting">
               <div class="archive-meeting-head"><b>اللقاء ${escapeHtml(day.meetingNumber)}</b><span>${escapeHtml(day.date)}</span></div>
               <dl>
-                <div><dt>إنجاز اليوم</dt><dd>${escapeHtml(day.achievement || "----")}</dd></div>
-                <div><dt>المطلوب للقاء القادم</dt><dd>${escapeHtml(day.nextRequired || "----")}</dd></div>
+                <div><dt>إنجاز اليوم</dt><dd>${escapeHtml(meetingText(day.achievement))}</dd></div>
+                <div><dt>المطلوب للقاء القادم</dt><dd>${escapeHtml(meetingText(day.nextRequired))}</dd></div>
               </dl>
             </article>`).join("")}</div>
         </section>
