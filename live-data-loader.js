@@ -11,12 +11,21 @@
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const rows = await response.json();
-      if (rows.length && rows[0].data) window.MOKHBITEEN_DATA = rows[0].data;
+      if (rows.length && rows[0].data) {
+        const liveData = rows[0].data;
+        (liveData.days || []).forEach((day) => {
+          ["achievement", "nextRequired"].forEach((field) => {
+            const value = String(day[field] || "").trim();
+            if (!value || value.startsWith("يُضاف")) day[field] = "----";
+          });
+        });
+        window.MOKHBITEEN_DATA = liveData;
+      }
     } catch (error) {
       console.warn("تعذر تحميل البيانات المباشرة؛ استُخدمت النسخة الاحتياطية المحلية:", error);
     }
     const script = document.createElement("script");
-    script.src = "script.js?v=20260807-12";
+    script.src = "script.js?v=20260808-13";
     document.body.appendChild(script);
   }
 

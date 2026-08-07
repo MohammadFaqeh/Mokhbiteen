@@ -107,6 +107,7 @@
 
   // Supabase هو المصدر الأساسي، والمسودة المحلية وdata.js احتياط فقط.
   let workingData = await loadRemoteBoard() || loadDraft() || JSON.parse(JSON.stringify(MOKHBITEEN_DATA));
+  sanitizeLegacyMeetingText(workingData);
   let activeDayIndex = 0;
   if (!workingData.meta.year) workingData.meta.year = String(new Date().getFullYear());
   if (workingData.meta.sitePublished === undefined) workingData.meta.sitePublished = true;
@@ -119,6 +120,14 @@
   }
   function saveDraft() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(workingData)); } catch (e) {}
+  }
+  function sanitizeLegacyMeetingText(boardData) {
+    (boardData.days || []).forEach((day) => {
+      ["achievement", "nextRequired"].forEach((field) => {
+        const value = String(day[field] || "").trim();
+        if (!value || value.startsWith("يُضاف")) day[field] = "----";
+      });
+    });
   }
   function showToast(msg) {
     const t = document.getElementById("toast");
@@ -629,6 +638,7 @@
 
   async function saveLiveBoard() {
     if (!supabaseClient) throw new Error("Supabase unavailable");
+    sanitizeLegacyMeetingText(workingData);
     recalcAllAndRank();
     saveDraft();
     const snapshot = JSON.parse(JSON.stringify(workingData));
