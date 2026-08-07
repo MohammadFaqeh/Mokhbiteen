@@ -779,40 +779,35 @@
     showToast("تم استيراد Excel إلى المسودة");
   });
 
-  function safeSheetName(value, usedNames) {
-    const base = String(value || "شهر").replace(/[\\/*?:\[\]]/g, "-").slice(0, 28) || "شهر";
-    let name = base, counter = 2;
-    while (usedNames.has(name)) name = `${base.slice(0, 25)}-${counter++}`;
-    usedNames.add(name);
-    return name;
-  }
-
-  function addMonthWorksheet(workbook, monthData, usedNames) {
+  function addMonthBlock(sheet, monthData, startRow) {
     const meta = monthData.meta || {};
     const days = monthData.days || [];
     const students = [...(monthData.students || [])].sort((a, b) => (a.rank || 999) - (b.rank || 999));
-    const sheet = workbook.addWorksheet(safeSheetName(`${meta.monthLabel || "شهر"}-${meta.year || ""}`, usedNames), { views: [{ rightToLeft: true, state: "frozen", ySplit: 5, xSplit: 2 }] });
-    const totalCols = 2 + days.length * 6 + 6;
-    sheet.mergeCells(1, 1, 1, totalCols);
-    sheet.getCell(1, 1).value = `${meta.projectName || "مشروع المخبتين القرآني"} — ${meta.heroTitle || meta.monthLabel || "لوحة الشرف"}`;
-    sheet.getCell(2, 1).value = "الشهر"; sheet.getCell(2, 2).value = meta.monthLabel || "";
-    sheet.getCell(2, 3).value = "السنة"; sheet.getCell(2, 4).value = Number(meta.year) || new Date().getFullYear();
-    sheet.mergeCells(4, 1, 5, 1); sheet.getCell(4, 1).value = "الترتيب";
-    sheet.mergeCells(4, 2, 5, 2); sheet.getCell(4, 2).value = "اسم الطالب";
+    const totalCols = 2 + days.length * 6 + 1;
+    const titleRow = startRow;
+    const metaRow = startRow + 1;
+    const groupRow = startRow + 3;
+    const axesRow = startRow + 4;
+    const dataStartRow = startRow + 5;
+    sheet.mergeCells(titleRow, 1, titleRow, totalCols);
+    sheet.getCell(titleRow, 1).value = `${meta.projectName || "مشروع المخبتين القرآني"} — ${meta.heroTitle || meta.monthLabel || "لوحة الشرف"}`;
+    sheet.getCell(metaRow, 1).value = "الشهر"; sheet.getCell(metaRow, 2).value = meta.monthLabel || "";
+    sheet.getCell(metaRow, 3).value = "السنة"; sheet.getCell(metaRow, 4).value = Number(meta.year) || new Date().getFullYear();
+    sheet.mergeCells(groupRow, 1, axesRow, 1); sheet.getCell(groupRow, 1).value = "الترتيب";
+    sheet.mergeCells(groupRow, 2, axesRow, 2); sheet.getCell(groupRow, 2).value = "اسم الطالب";
     const axes = ["الدوام", "الحفظ", "المراجعة", "العبادات", "التقييم", "معدل اللقاء"];
     days.forEach((day, index) => {
       const start = 3 + index * 6;
-      sheet.mergeCells(4, start, 4, start + 5);
-      sheet.getCell(4, start).value = `اللقاء ${index + 1} (${day.date || "--/--"})`;
-      axes.forEach((axis, axisIndex) => sheet.getCell(5, start + axisIndex).value = axis);
+      sheet.mergeCells(groupRow, start, groupRow, start + 5);
+      sheet.getCell(groupRow, start).value = `اللقاء ${index + 1} (${day.date || "--/--"})`;
+      axes.forEach((axis, axisIndex) => sheet.getCell(axesRow, start + axisIndex).value = axis);
     });
     const monthlyStart = 3 + days.length * 6;
-    sheet.mergeCells(4, monthlyStart, 4, monthlyStart + 5);
-    sheet.getCell(4, monthlyStart).value = "معدلات الشهر";
-    ["متوسط الدوام", "متوسط الحفظ", "متوسط المراجعة", "متوسط العبادات", "متوسط التقييم", "المعدل النهائي"].forEach((axis, index) => sheet.getCell(5, monthlyStart + index).value = axis);
+    sheet.mergeCells(groupRow, monthlyStart, axesRow, monthlyStart);
+    sheet.getCell(groupRow, monthlyStart).value = "معدل الشهر";
 
     students.forEach((student, studentIndex) => {
-      const row = 6 + studentIndex;
+      const row = dataStartRow + studentIndex;
       sheet.getCell(row, 1).value = student.rank || studentIndex + 1;
       sheet.getCell(row, 2).value = student.name;
       days.forEach((day, dayIndex) => {
@@ -821,27 +816,24 @@
         [score.attendance, score.memorization, score.revision, score.worship, score.evaluation].forEach((value, index) => sheet.getCell(row, start + index).value = Number(value) || 0);
         sheet.getCell(row, start + 5).value = { formula: `${sheet.getCell(row,start).address}*10%+${sheet.getCell(row,start+1).address}*30%+${sheet.getCell(row,start+2).address}*30%+${sheet.getCell(row,start+3).address}*20%+${sheet.getCell(row,start+4).address}*10%`, result: Number(score.dayAverage) || 0 };
       });
-      for (let axisIndex = 0; axisIndex < 5; axisIndex++) {
-        const refs = days.map((_, dayIndex) => sheet.getCell(row, 3 + dayIndex * 6 + axisIndex).address);
-        sheet.getCell(row, monthlyStart + axisIndex).value = { formula: `AVERAGE(${refs.join(",")})`, result: Number(student[["attendance","memorization","revision","worship","evaluation"][axisIndex]]) || 0 };
-      }
-      sheet.getCell(row, monthlyStart + 5).value = { formula: `${sheet.getCell(row,monthlyStart).address}*10%+${sheet.getCell(row,monthlyStart+1).address}*30%+${sheet.getCell(row,monthlyStart+2).address}*30%+${sheet.getCell(row,monthlyStart+3).address}*20%+${sheet.getCell(row,monthlyStart+4).address}*10%`, result: Number(student.final) || 0 };
+      const meetingAverageRefs = days.map((_, dayIndex) => sheet.getCell(row, 3 + dayIndex * 6 + 5).address);
+      sheet.getCell(row, monthlyStart).value = { formula: `AVERAGE(${meetingAverageRefs.join(",")})`, result: Number(student.final) || 0 };
     });
 
-    sheet.getRow(1).height = 34; sheet.getRow(4).height = 28; sheet.getRow(5).height = 34;
+    sheet.getRow(titleRow).height = 34; sheet.getRow(groupRow).height = 28; sheet.getRow(axesRow).height = 34;
     sheet.getColumn(1).width = 10; sheet.getColumn(2).width = 28;
     for (let colIndex = 3; colIndex <= totalCols; colIndex++) sheet.getColumn(colIndex).width = 13;
-    sheet.getCell(1,1).font = { name: "Arial", size: 16, bold: true, color: { argb: "FFFFFFFF" } };
-    sheet.getCell(1,1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF16232C" } };
-    sheet.getCell(1,1).alignment = { horizontal: "center", vertical: "middle" };
-    [4,5].forEach((row) => sheet.getRow(row).eachCell((cell) => {
+    sheet.getCell(titleRow,1).font = { name: "Arial", size: 16, bold: true, color: { argb: "FFFFFFFF" } };
+    sheet.getCell(titleRow,1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF16232C" } };
+    sheet.getCell(titleRow,1).alignment = { horizontal: "center", vertical: "middle" };
+    [groupRow,axesRow].forEach((row) => sheet.getRow(row).eachCell((cell) => {
       cell.font = { name: "Arial", bold: true, color: { argb: "FFFFFFFF" } };
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row === 4 ? "FF1F6B52" : "FF2B7A62" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row === groupRow ? "FF1F6B52" : "FF2B7A62" } };
       cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     }));
     if (students.length) {
-      const dataRangeRows = students.length + 5;
-      for (let row = 6; row <= dataRangeRows; row++) {
+      const dataEndRow = dataStartRow + students.length - 1;
+      for (let row = dataStartRow; row <= dataEndRow; row++) {
         sheet.getRow(row).height = 23;
         for (let colIndex = 1; colIndex <= totalCols; colIndex++) {
           const cell = sheet.getCell(row, colIndex);
@@ -851,8 +843,7 @@
         }
       }
     }
-    sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
-    return sheet;
+    return { nextRow: dataStartRow + students.length + 3, totalCols };
   }
 
   async function downloadWorkbook(workbook, filename) {
@@ -875,8 +866,16 @@
       const workbook = new ExcelJS.Workbook();
       workbook.creator = "مشروع المخبتين القرآني";
       workbook.calcProperties.fullCalcOnLoad = true;
-      const usedNames = new Set();
-      months.forEach((monthData) => addMonthWorksheet(workbook, monthData, usedNames));
+      const sheet = workbook.addWorksheet("الأرشيف التراكمي", { views: [{ rightToLeft: true, state: "frozen", ySplit: 5, xSplit: 2 }] });
+      let nextRow = 1;
+      let maxCols = 3;
+      months.forEach((monthData) => {
+        const block = addMonthBlock(sheet, monthData, nextRow);
+        nextRow = block.nextRow;
+        maxCols = Math.max(maxCols, block.totalCols);
+      });
+      sheet.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+      for (let colIndex = 3; colIndex <= maxCols; colIndex++) sheet.getColumn(colIndex).width = 13;
       await downloadWorkbook(workbook, `أرشيف-مشروع-المخبتين-${new Date().toISOString().slice(0,10)}.xlsx`);
       showToast("تم تنزيل ملف Excel التراكمي");
     } catch (error) {
