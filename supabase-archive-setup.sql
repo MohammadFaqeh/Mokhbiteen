@@ -26,20 +26,32 @@ drop policy if exists "Admin can insert honor board archives" on public.honor_bo
 create policy "Admin can insert honor board archives"
 on public.honor_board_archives for insert
 to authenticated
-with check (auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid);
+with check (
+  auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid
+  and (select auth.jwt()->>'aal') = 'aal2'
+);
 
 drop policy if exists "Admin can update honor board archives" on public.honor_board_archives;
 create policy "Admin can update honor board archives"
 on public.honor_board_archives for update
 to authenticated
-using (auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid)
-with check (auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid);
+using (
+  auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid
+  and (select auth.jwt()->>'aal') = 'aal2'
+)
+with check (
+  auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid
+  and (select auth.jwt()->>'aal') = 'aal2'
+);
 
 drop policy if exists "Admin can delete honor board archives" on public.honor_board_archives;
 create policy "Admin can delete honor board archives"
 on public.honor_board_archives for delete
 to authenticated
-using (auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid);
+using (
+  auth.uid() = '837e6aba-b0f4-4ed4-bba0-18660fb0ccd1'::uuid
+  and (select auth.jwt()->>'aal') = 'aal2'
+);
 
 create index if not exists honor_board_archives_year_month_idx
 on public.honor_board_archives (year desc, archived_at desc);
