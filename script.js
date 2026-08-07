@@ -71,9 +71,9 @@
     const el = document.getElementById(id);
     if (el && value) el.textContent = value;
   }
-  document.title = `${meta.projectName} | ${meta.heroTitle}`;
+  document.title = meta.projectName;
   const pageDescription = document.getElementById("pageDescription");
-  if (pageDescription) pageDescription.content = `${meta.heroTitle} — ${meta.projectName}`;
+  if (pageDescription) pageDescription.content = `الموقع الرسمي لـ ${meta.projectName}`;
   setText("navProjectName", meta.projectName);
   setText("heroProjectName", meta.projectName);
   setText("heroVerse", `﴿ ${meta.verse} ﴾`);
@@ -87,7 +87,7 @@
   setText("journeyActionText", `رحلة ${meta.monthLabel}`);
   setText("studentsSectionSub", `${students.length} طالبًا، وكل واحد منهم له بصمته وجهده الخاص هذا الشهر`);
   setText("footerVerse", `﴿ ${meta.verse} ﴾`);
-  setText("footerProjectLine", `${meta.projectName} — ${meta.heroTitle}`);
+  setText("footerProjectLine", meta.projectName);
   setText("supervisorName", meta.supervisor);
   setText("supervisorTitle", meta.supervisorTitle);
   setText("footerCopyright", `جميع الحقوق محفوظة © ${meta.projectName}`);

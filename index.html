@@ -3,11 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="pageTitle">مشروع المخبتين القرآني | لوحة شرف شهر 7</title>
-<meta id="pageDescription" name="description" content="لوحة الشرف الإلكترونية لمشروع المخبتين القرآني - نتائج شهر 7">
+<title id="pageTitle">مشروع المخبتين القرآني</title>
+<meta id="pageDescription" name="description" content="الموقع الرسمي لمشروع المخبتين القرآني">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_JO">
+<meta property="og:title" content="مشروع المخبتين القرآني">
+<meta property="og:description" content="الموقع الرسمي لمشروع المخبتين القرآني">
+<meta property="og:url" content="https://mohammadfaqeh.github.io/Mokhbiteen/">
+<meta property="og:image" content="https://mohammadfaqeh.github.io/Mokhbiteen/assets/logo.png">
 <link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="style.css?v=20260805-3">
+<link rel="stylesheet" href="style.css?v=20260807-10">
 </head>
 <body class="site-status-loading">
 
@@ -46,6 +52,7 @@
     <li><a href="#podium" class="nav-link">لوحة الشرف</a></li>
     <li><a href="#journey" class="nav-link">رحلة الشهر</a></li>
     <li><a href="#students" class="nav-link">الطلاب</a></li>
+    <li><a href="#archives" class="nav-link">الأرشيف</a></li>
   </ul>
 </nav>
 
@@ -151,11 +158,25 @@
   </div>
 </section>
 
+<!-- أرشيف لوحات الشرف -->
+<section class="archives-section" id="archives">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-eyebrow">ذاكرة المشروع</span>
+      <h2 class="section-title">أرشيف لوحات الشرف</h2>
+      <p class="section-sub">مسيرة محفوظة شهرًا بعد شهر، وشواهد باقية على الجد والاجتهاد</p>
+    </div>
+    <div class="archives-grid" id="archivesGrid">
+      <div class="archives-loading"><i class="fa-solid fa-spinner fa-spin"></i> جارٍ تحميل الأرشيف...</div>
+    </div>
+  </div>
+</section>
+
 <!-- التذييل -->
 <footer>
   <img src="assets/logo.png" alt="شعار المشروع" class="footer-logo">
   <p class="footer-verse" id="footerVerse">﴿ وَبَشِّرِ الْمُخْبِتِينَ ﴾</p>
-  <p id="footerProjectLine" style="font-size:.85rem;color:rgba(246,239,223,.55)">مشروع المخبتين القرآني — لوحة شرف شهر 7</p>
+  <p id="footerProjectLine" style="font-size:.85rem;color:rgba(246,239,223,.55)">مشروع المخبتين القرآني</p>
 
   <div class="footer-mentor">
     <img src="assets/mentor.jpg" alt="مشرف المشروع">
@@ -193,8 +214,9 @@
 </svg>
 
 <script src="supabase-config.js?v=20260803-5"></script>
-<script src="data.js?v=20260803-5"></script>
-<script src="script.js?v=20260803-5"></script>
+<script src="data.js?v=20260807-9"></script>
+<script src="script.js?v=20260807-9"></script>
+<script src="archives.js?v=20260807-10"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>

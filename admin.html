@@ -6,7 +6,7 @@
 <title>لوحة التحكم | مشروع المخبتين القرآني</title>
 <link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="style.css?v=20260803-6">
+<link rel="stylesheet" href="style.css?v=20260807-10">
 <style>
   body{ background:var(--cream-soft); }
   .admin-shell{ max-width:1100px; margin:0 auto; padding:100px 5% 80px; }
@@ -82,6 +82,10 @@
   .publish-dot{ width:11px; height:11px; border-radius:50%; background:#b8563f; box-shadow:0 0 0 5px rgba(184,86,63,.1); }
   .publish-status.is-live .publish-dot{ background:var(--emerald); box-shadow:0 0 0 5px rgba(31,107,82,.1); }
   .publish-help{ width:100%; margin:0; color:var(--ink-soft); font-size:.82rem; line-height:1.8; }
+  .archive-admin-panel{ display:flex; align-items:center; justify-content:space-between; gap:22px; flex-wrap:wrap; }
+  .archive-admin-copy{ flex:1; min-width:240px; }
+  .archive-admin-copy p{ color:var(--ink-soft); font-size:.86rem; line-height:1.8; margin:0; }
+  .archive-admin-state{ margin-top:9px; font-size:.78rem; color:var(--emerald); font-weight:700; }
   pre#exportPreview{
     max-height:280px; overflow:auto; background:var(--navy-deep); color:#dce8e0;
     padding:16px; border-radius:12px; font-size:.72rem; display:none;
@@ -180,6 +184,17 @@
   </div>
 
   <div class="admin-card">
+    <h2><i class="fa-solid fa-box-archive"></i> أرشفة لوحة الشرف</h2>
+    <div class="archive-admin-panel">
+      <div class="archive-admin-copy">
+        <p>بعد اعتماد نتائج الشهر، احفظ نسخة نهائية في الأرشيف العام قبل بدء شهر جديد. لن تتغير النسخة المؤرشفة عند تعديل <code>data.js</code> لاحقًا.</p>
+        <div class="archive-admin-state" id="archiveAdminState">لم يتم فحص حالة أرشفة اللوحة الحالية بعد.</div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="archiveCurrentBtn"><i class="fa-solid fa-box-archive"></i> أرشفة اللوحة الحالية</button>
+    </div>
+  </div>
+
+  <div class="admin-card">
     <h2><i class="fa-solid fa-calendar-plus"></i> إدارة الشهر واللقاءات</h2>
     <div class="month-setup-grid">
       <div class="meta-field">
@@ -240,6 +255,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20260803-3"></script>
 <script src="data.js?v=20260803-3"></script>
-<script src="admin.js?v=20260803-3"></script>
+<script src="admin.js?v=20260807-10"></script>
 </body>
 </html>

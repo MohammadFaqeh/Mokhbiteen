@@ -165,6 +165,85 @@
   });
 
   /* ---------------------------------------------------------------------
+     أرشفة لوحة الشرف في Supabase
+  --------------------------------------------------------------------- */
+  const archiveCurrentBtn = document.getElementById("archiveCurrentBtn");
+  const archiveAdminState = document.getElementById("archiveAdminState");
+
+  function currentArchiveKey() {
+    const year = String(workingData.meta.year || new Date().getFullYear()).trim();
+    const month = String(workingData.meta.monthLabel || "لوحة").trim().replace(/\s+/g, "-");
+    return `${year}-${month}`;
+  }
+
+  async function refreshCurrentArchiveState() {
+    if (!supabaseClient) return;
+    const { data, error } = await supabaseClient
+      .from("honor_board_archives")
+      .select("archived_at")
+      .eq("archive_key", currentArchiveKey())
+      .maybeSingle();
+    if (error) {
+      archiveAdminState.textContent = "الأرشيف غير مهيأ بعد — شغّل ملف supabase-archive-setup.sql في Supabase.";
+      archiveAdminState.style.color = "#b8563f";
+      return;
+    }
+    archiveAdminState.style.color = "";
+    archiveAdminState.textContent = data
+      ? `هذه اللوحة مؤرشفة — آخر حفظ ${new Date(data.archived_at).toLocaleString("ar-JO")}`
+      : "هذه اللوحة لم تُؤرشف بعد.";
+  }
+
+  archiveCurrentBtn.addEventListener("click", async () => {
+    if (!supabaseClient) {
+      showToast("تعذر الاتصال بخدمة الأرشيف");
+      return;
+    }
+    const label = workingData.meta.monthLabel || "اللوحة الحالية";
+    const year = Number(workingData.meta.year) || new Date().getFullYear();
+    const { data: existing, error: checkError } = await supabaseClient
+      .from("honor_board_archives")
+      .select("id")
+      .eq("archive_key", currentArchiveKey())
+      .maybeSingle();
+    if (checkError) {
+      console.error("تعذر فحص الأرشيف:", checkError);
+      showToast("الأرشيف غير مهيأ — شغّل ملف SQL أولًا");
+      return;
+    }
+    const message = existing
+      ? `لوحة ${label} — ${year} مؤرشفة سابقًا. هل تريد استبدال النسخة المؤرشفة بالبيانات الحالية؟`
+      : `سيتم حفظ لوحة ${label} — ${year} كاملة في الأرشيف العام. هل تريد المتابعة؟`;
+    if (!confirm(message)) return;
+
+    archiveCurrentBtn.disabled = true;
+    archiveCurrentBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الأرشفة...';
+    recalcAllAndRank();
+    saveDraft();
+    const snapshot = JSON.parse(JSON.stringify(workingData));
+    const archiveRow = {
+      archive_key: currentArchiveKey(),
+      month_label: label,
+      year,
+      title: workingData.meta.heroTitle || `لوحة شرف ${label}`,
+      data: snapshot,
+      archived_at: new Date().toISOString()
+    };
+    const { error } = await supabaseClient
+      .from("honor_board_archives")
+      .upsert(archiveRow, { onConflict: "archive_key" });
+    archiveCurrentBtn.disabled = false;
+    archiveCurrentBtn.innerHTML = '<i class="fa-solid fa-box-archive"></i> أرشفة اللوحة الحالية';
+    if (error) {
+      console.error("تعذر أرشفة اللوحة:", error);
+      showToast("لم تتم الأرشفة — تحقق من إعداد Supabase");
+      return;
+    }
+    showToast(existing ? "تم تحديث النسخة المؤرشفة" : "تمت أرشفة اللوحة بنجاح");
+    refreshCurrentArchiveState();
+  });
+
+  /* ---------------------------------------------------------------------
      بيانات عامة
   --------------------------------------------------------------------- */
   const metaFields = document.getElementById("metaFields");
@@ -570,6 +649,7 @@
   }
   renderAll();
   loadRemotePublicationStatus();
+  refreshCurrentArchiveState();
 
   } // نهاية initAdminPanel
 

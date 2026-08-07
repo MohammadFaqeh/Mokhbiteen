@@ -789,6 +789,19 @@ section{ position:relative; padding:100px 5%; }
 }
 
 /* ===================== تذييل ===================== */
+/* ===================== أرشيف لوحات الشرف ===================== */
+.archives-section{padding:90px 5%;background:linear-gradient(180deg,var(--cream-soft),#eee8d8)}
+.archives-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;max-width:1050px;margin:0 auto}
+.archive-card{position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:220px;padding:26px;color:var(--cream);text-decoration:none;background:linear-gradient(145deg,var(--navy-deep),var(--teal));border:1px solid rgba(201,162,75,.45);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);transition:.25s}
+.archive-card:before{content:"﴿";position:absolute;left:-5px;top:-52px;font-family:var(--font-display);font-size:10rem;color:rgba(229,198,111,.06)}
+.archive-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-deep);border-color:var(--gold-light)}
+.archive-card-year{position:relative;color:var(--gold-light);font-size:.78rem;font-weight:800;letter-spacing:.08em}
+.archive-card h3{position:relative;font-family:var(--font-display);font-size:1.65rem;margin:12px 0 5px}
+.archive-card p{position:relative;color:rgba(246,239,223,.62);font-size:.8rem}
+.archive-card-footer{position:relative;margin-top:auto;padding-top:24px;display:flex;justify-content:space-between;align-items:center;color:var(--gold-light);font-size:.82rem;font-weight:700}
+.archives-loading,.archives-empty{grid-column:1/-1;text-align:center;padding:38px;color:var(--ink-soft);background:rgba(255,255,255,.45);border-radius:var(--radius-lg)}
+.archives-empty i{display:block;color:var(--gold);font-size:2rem;margin-bottom:12px}
+
 footer{
   background:var(--navy-deep);
   color:rgba(246,239,223,.75);

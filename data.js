@@ -35,8 +35,8 @@ const MOKHBITEEN_DATA = {
       "groupAverage": 79.8,
       "presentCount": 13,
       "totalCount": 13,
-      "achievement": "يُضاف إنجاز هذا اللقاء",
-      "nextRequired": "يُضاف المطلوب للقاء القادم",
+      "achievement": "----",
+      "nextRequired": "----",
       "note": "بداية قوية للمجموعة في أول لقاء من الشهر، حضور كامل لكل الطلاب.",
       "motivation": "الخطوة الأولى في الطريق أعظمها بركة، فأحسنوا البداية يُحسن الله لكم الختام."
     },
@@ -47,8 +47,8 @@ const MOKHBITEEN_DATA = {
       "groupAverage": 76.5,
       "presentCount": 11,
       "totalCount": 13,
-      "achievement": "يُضاف إنجاز هذا اللقاء",
-      "nextRequired": "يُضاف المطلوب للقاء القادم",
+      "achievement": "----",
+      "nextRequired": "----",
       "note": "تراجع طفيف في نسبة الحضور، وبعض الطلاب بحاجة لمتابعة أقرب.",
       "motivation": "لا تحزن إن فاتك يوم، فالمثابرة على القليل خير من الانقطاع عن الكثير."
     },
@@ -59,8 +59,8 @@ const MOKHBITEEN_DATA = {
       "groupAverage": 74.9,
       "presentCount": 13,
       "totalCount": 13,
-      "achievement": "يُضاف إنجاز هذا اللقاء",
-      "nextRequired": "يُضاف المطلوب للقاء القادم",
+      "achievement": "----",
+      "nextRequired": "----",
       "note": "عودة الحضور الكامل مع تفاوت ملحوظ في مستوى الحفظ والمراجعة بين الطلاب.",
       "motivation": "من جدّ وجد، والقرآن يرفع أهله إذا صدقوا مع الله في حفظه ومراجعته."
     },
@@ -71,8 +71,8 @@ const MOKHBITEEN_DATA = {
       "groupAverage": 79.4,
       "presentCount": 12,
       "totalCount": 13,
-      "achievement": "يُضاف إنجاز هذا اللقاء",
-      "nextRequired": "يُضاف المطلوب للقاء القادم",
+      "achievement": "----",
+      "nextRequired": "----",
       "note": "تحسن ملحوظ في أداء أغلب الطلاب مقارنة باللقاء السابق.",
       "motivation": "﴿ وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا ﴾ فاستمروا على هذا العطاء."
     },
@@ -83,8 +83,8 @@ const MOKHBITEEN_DATA = {
       "groupAverage": 70.5,
       "presentCount": 12,
       "totalCount": 13,
-      "achievement": "يُضاف إنجاز هذا اللقاء",
-      "nextRequired": "يُضاف المطلوب للشهر القادم",
+      "achievement": "----",
+      "nextRequired": "----",
       "note": "ختام الشهر بنتائج متفاوتة، وتستحق المجموعة تحفيزًا إضافيًا في الشهر القادم.",
       "motivation": "نسأل الله أن يجعل شهركم القادم أوفر حظًا وأعظم أجرًا وأثبت عزيمة."
     }
