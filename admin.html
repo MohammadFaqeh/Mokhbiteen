@@ -121,6 +121,12 @@
   .lock-box input:focus{ outline:none; border-color:var(--gold); }
   .lock-box button{ width:100%; }
   .lock-error{ color:#b8563f; font-size:.82rem; margin-top:12px; min-height:18px; }
+  .auth-step-hidden{ display:none !important; }
+  .mfa-qr{ width:180px !important; height:180px; object-fit:contain; margin:0 auto 12px !important; background:#fff; padding:8px; border-radius:12px; }
+  .mfa-secret{ direction:ltr; word-break:break-all; font-family:monospace; font-size:.72rem; color:var(--ink-soft); margin:0 0 12px; }
+  .trust-device{ display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 14px; color:var(--ink-soft); font-size:.8rem; }
+  .trust-device input{ width:auto; margin:0; }
+  .auth-back{ border:0; background:transparent !important; color:var(--emerald); margin-top:8px; font-size:.78rem; cursor:pointer; }
   .admin-hidden{ display:none !important; }
   @media(max-width:600px){
     .meeting-manage-row{ grid-template-columns:72px minmax(130px,1fr) 36px; padding:10px 6px; }
@@ -143,9 +149,22 @@
     <h2>لوحة تحكم المخبتين</h2>
     <p>هذه الصفحة مخصصة للمشرف فقط. الرجاء إدخال كلمة المرور للمتابعة.</p>
     <form id="lockForm">
-      <input type="email" id="lockEmailInput" placeholder="البريد الإلكتروني للمشرف" autocomplete="username" required>
-      <input type="password" id="lockPasswordInput" placeholder="كلمة مرور حساب المشرف" autocomplete="current-password" required>
-      <button type="submit" class="btn btn-gold">دخول</button>
+      <div id="passwordAuthStep">
+        <input type="email" id="lockEmailInput" placeholder="البريد الإلكتروني للمشرف" autocomplete="username" required>
+        <input type="password" id="lockPasswordInput" placeholder="كلمة مرور حساب المشرف" autocomplete="current-password" required>
+      </div>
+      <div id="mfaEnrollStep" class="auth-step-hidden">
+        <p>امسح الرمز مرة واحدة بتطبيق Google Authenticator أو Microsoft Authenticator.</p>
+        <img id="mfaQrImage" class="mfa-qr" alt="رمز إعداد المصادقة الثنائية">
+        <div id="mfaSecret" class="mfa-secret"></div>
+      </div>
+      <div id="mfaCodeStep" class="auth-step-hidden">
+        <p id="mfaCodeHelp">أدخل رمز التحقق المكوّن من 6 أرقام من تطبيق المصادقة.</p>
+        <input type="text" id="mfaCodeInput" placeholder="000000" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+        <label class="trust-device"><input type="checkbox" id="trustDeviceInput" checked> الثقة بهذا الجهاز لمدة 30 يومًا</label>
+      </div>
+      <button type="submit" class="btn btn-gold" id="authSubmitBtn">دخول</button>
+      <button type="button" class="auth-back auth-step-hidden" id="authBackBtn">العودة لتسجيل الدخول</button>
       <div class="lock-error" id="lockError"></div>
     </form>
   </div>
@@ -272,6 +291,6 @@
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="supabase-config.js?v=20260803-3"></script>
 <script src="data.js?v=20260807-12"></script>
-<script src="admin.js?v=20260808-15"></script>
+<script src="admin.js?v=20260808-16"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@
   const supabaseConfig = window.MOKHBITEEN_SUPABASE;
   const supabaseClient = supabaseConfig && window.supabase
     ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
-        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
       })
     : null;
 
@@ -19,7 +19,46 @@
   const lockEmail = document.getElementById("lockEmailInput");
   const lockInput = document.getElementById("lockPasswordInput");
   const lockError = document.getElementById("lockError");
+  const passwordAuthStep = document.getElementById("passwordAuthStep");
+  const mfaEnrollStep = document.getElementById("mfaEnrollStep");
+  const mfaCodeStep = document.getElementById("mfaCodeStep");
+  const mfaCodeInput = document.getElementById("mfaCodeInput");
+  const mfaQrImage = document.getElementById("mfaQrImage");
+  const mfaSecret = document.getElementById("mfaSecret");
+  const trustDeviceInput = document.getElementById("trustDeviceInput");
+  const authSubmitBtn = document.getElementById("authSubmitBtn");
+  const authBackBtn = document.getElementById("authBackBtn");
+  const TRUST_UNTIL_KEY = "mokhbiteen_admin_trusted_until_v1";
+  const TRUST_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+  let authStage = "password";
+  let pendingMfaFactorId = null;
   let adminInitialized = false;
+
+  function setAuthStage(stage, enrollment = false) {
+    authStage = stage;
+    passwordAuthStep.classList.toggle("auth-step-hidden", stage !== "password");
+    mfaCodeStep.classList.toggle("auth-step-hidden", stage !== "mfa");
+    mfaEnrollStep.classList.toggle("auth-step-hidden", stage !== "mfa" || !enrollment);
+    authBackBtn.classList.toggle("auth-step-hidden", stage === "password");
+    authSubmitBtn.textContent = stage === "password" ? "دخول" : (enrollment ? "تفعيل ودخول" : "تحقق ودخول");
+    lockError.textContent = "";
+    if (stage === "mfa") setTimeout(() => mfaCodeInput.focus(), 0);
+  }
+
+  function rememberTrustedDevice() {
+    if (trustDeviceInput.checked) {
+      localStorage.setItem(TRUST_UNTIL_KEY, String(Date.now() + TRUST_DURATION_MS));
+    } else {
+      localStorage.removeItem(TRUST_UNTIL_KEY);
+    }
+  }
+
+  function isDeviceTrusted() {
+    const trustedUntil = Number(localStorage.getItem(TRUST_UNTIL_KEY) || 0);
+    if (trustedUntil > Date.now()) return true;
+    localStorage.removeItem(TRUST_UNTIL_KEY);
+    return false;
+  }
 
   function unlock() {
     lockOverlay.style.display = "none";
@@ -39,6 +78,49 @@
     lockError.textContent = "";
     lockEmail.value = "";
     lockInput.value = "";
+    mfaCodeInput.value = "";
+    setAuthStage("password");
+  }
+
+  async function beginMfaEnrollment() {
+    const factorsResult = await supabaseClient.auth.mfa.listFactors();
+    const unverified = (factorsResult.data?.totp || []).filter((factor) => factor.status !== "verified");
+    for (const factor of unverified) await supabaseClient.auth.mfa.unenroll({ factorId: factor.id });
+    const { data, error } = await supabaseClient.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "لوحة تحكم المخبتين"
+    });
+    if (error) throw error;
+    pendingMfaFactorId = data.id;
+    mfaQrImage.src = data.totp.qr_code;
+    mfaSecret.textContent = `المفتاح الاحتياطي: ${data.totp.secret}`;
+    setAuthStage("mfa", true);
+  }
+
+  async function continueAfterPassword() {
+    const { data, error } = await supabaseClient.auth.mfa.listFactors();
+    if (error) throw error;
+    const verifiedFactor = (data.totp || []).find((factor) => factor.status === "verified");
+    if (verifiedFactor) {
+      pendingMfaFactorId = verifiedFactor.id;
+      mfaQrImage.removeAttribute("src");
+      mfaSecret.textContent = "";
+      setAuthStage("mfa", false);
+    } else {
+      await beginMfaEnrollment();
+    }
+  }
+
+  async function verifyMfaCode() {
+    const code = mfaCodeInput.value.replace(/\D/g, "");
+    if (code.length !== 6) throw new Error("أدخل رمز التحقق المكوّن من 6 أرقام.");
+    const { error } = await supabaseClient.auth.mfa.challengeAndVerify({
+      factorId: pendingMfaFactorId,
+      code
+    });
+    if (error) throw error;
+    rememberTrustedDevice();
+    unlock();
   }
 
   lockForm.addEventListener("submit", async (e) => {
@@ -47,35 +129,81 @@
       lockError.textContent = "تعذر الاتصال بخدمة تسجيل الدخول. تحقق من الإنترنت ثم أعد المحاولة.";
       return;
     }
-    const submitButton = lockForm.querySelector("button[type='submit']");
-    submitButton.disabled = true;
-    submitButton.textContent = "جاري التحقق...";
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email: lockEmail.value.trim(),
-      password: lockInput.value
-    });
-    submitButton.disabled = false;
-    submitButton.textContent = "دخول";
-    if (!error) {
-      unlock();
-    } else {
-      lockError.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
-      lockInput.value = "";
-      lockInput.focus();
+    authSubmitBtn.disabled = true;
+    const originalLabel = authSubmitBtn.textContent;
+    authSubmitBtn.textContent = "جاري التحقق...";
+    try {
+      if (authStage === "password") {
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email: lockEmail.value.trim(),
+          password: lockInput.value
+        });
+        if (error) throw error;
+        await continueAfterPassword();
+      } else {
+        await verifyMfaCode();
+      }
+    } catch (error) {
+      console.error("تعذر إكمال تسجيل الدخول:", error);
+      lockError.textContent = authStage === "password"
+        ? "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+        : (error.message === "أدخل رمز التحقق المكوّن من 6 أرقام." ? error.message : "رمز التحقق غير صحيح أو انتهت صلاحيته.");
+      if (authStage === "password") {
+        lockInput.value = "";
+        lockInput.focus();
+      } else {
+        mfaCodeInput.select();
+      }
+    } finally {
+      authSubmitBtn.disabled = false;
+      if (lockOverlay.style.display !== "none") {
+        const isEnrollment = !mfaEnrollStep.classList.contains("auth-step-hidden");
+        authSubmitBtn.textContent = authStage === "password" ? originalLabel : (isEnrollment ? "تفعيل ودخول" : "تحقق ودخول");
+      }
     }
   });
 
+  authBackBtn.addEventListener("click", async () => {
+    localStorage.removeItem(TRUST_UNTIL_KEY);
+    if (supabaseClient) await supabaseClient.auth.signOut({ scope: "local" });
+    pendingMfaFactorId = null;
+    setAuthStage("password");
+    lockEmail.focus();
+  });
+
   document.getElementById("logoutBtn").addEventListener("click", async () => {
-    if (supabaseClient) await supabaseClient.auth.signOut();
+    localStorage.removeItem(TRUST_UNTIL_KEY);
+    if (supabaseClient) await supabaseClient.auth.signOut({ scope: "local" });
     lockAdmin();
     lockInput.focus();
   });
 
   // قفل الصفحة عند مغادرتها، بما في ذلك العودة للموقع العام وزر الرجوع في المتصفح.
   window.addEventListener("pagehide", lockAdmin);
-  window.addEventListener("pageshow", (e) => {
-    if (e.persisted) lockAdmin();
-  });
+
+  async function restoreTrustedSession() {
+    if (!supabaseClient || !isDeviceTrusted()) {
+      if (supabaseClient) await supabaseClient.auth.signOut({ scope: "local" });
+      lockAdmin();
+      return;
+    }
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (!sessionData.session) {
+      localStorage.removeItem(TRUST_UNTIL_KEY);
+      lockAdmin();
+      return;
+    }
+    const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aalData?.currentLevel === "aal2") unlock();
+    else {
+      localStorage.removeItem(TRUST_UNTIL_KEY);
+      await supabaseClient.auth.signOut({ scope: "local" });
+      lockAdmin();
+    }
+  }
+
+  window.addEventListener("pageshow", restoreTrustedSession);
+  restoreTrustedSession();
 
   async function initAdminPanel() {
 
@@ -349,10 +477,12 @@
     );
   }
 
-  function recalcAllAndRank() {
+  function recalcAllAndRank(sortStudents = true) {
     workingData.students.forEach(recalcStudent);
-    workingData.students.sort((a, b) => b.final - a.final);
-    workingData.students.forEach((s, i) => (s.rank = i + 1));
+    if (sortStudents) {
+      workingData.students.sort((a, b) => b.final - a.final);
+      workingData.students.forEach((s, i) => (s.rank = i + 1));
+    }
 
     // تحديث متوسط كل يوم للمجموعة وإحصائيات عامة
     workingData.days.forEach((d) => {
@@ -564,9 +694,10 @@
       const v = Math.max(0, Math.min(100, parseFloat(e.target.value) || 0));
       st.days[activeDayIndex][field] = v;
     }
-    recalcAllAndRank();
+    // نحسب ونحفظ في الخلفية من دون ترتيب الصفوف أو إعادة بناء الجدول أثناء الكتابة.
+    // بذلك يبقى المؤشر داخل الخانة ولا تقفز الصفحة إلى الأعلى.
+    recalcAllAndRank(false);
     saveDraft();
-    renderStudentsTable();
   });
 
   studentsEditTable.addEventListener("click", (e) => {
