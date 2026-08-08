@@ -28,6 +28,7 @@
   const trustDeviceInput = document.getElementById("trustDeviceInput");
   const authSubmitBtn = document.getElementById("authSubmitBtn");
   const authBackBtn = document.getElementById("authBackBtn");
+  const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
   const TRUST_UNTIL_KEY = "mokhbiteen_admin_trusted_until_v1";
   const TRUST_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
   let authStage = "password";
@@ -169,6 +170,28 @@
     pendingMfaFactorId = null;
     setAuthStage("password");
     lockEmail.focus();
+  });
+
+  forgotPasswordBtn.addEventListener("click", async () => {
+    if (!supabaseClient) {
+      lockError.textContent = "تعذر الاتصال بخدمة استعادة كلمة المرور.";
+      return;
+    }
+    const email = lockEmail.value.trim();
+    if (!email) {
+      lockError.textContent = "اكتب بريدك الإلكتروني أولًا، ثم اضغط نسيت كلمة المرور.";
+      lockEmail.focus();
+      return;
+    }
+    forgotPasswordBtn.disabled = true;
+    forgotPasswordBtn.textContent = "جاري إرسال الرابط...";
+    const redirectTo = new URL("reset-password.html", window.location.href).href;
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+    forgotPasswordBtn.disabled = false;
+    forgotPasswordBtn.textContent = "نسيت كلمة المرور؟";
+    lockError.textContent = error
+      ? "تعذر إرسال الرابط. تحقق من البريد أو حاول بعد قليل."
+      : "تم إرسال رابط تغيير كلمة المرور إلى بريدك. افحص البريد الوارد والرسائل غير المرغوب فيها.";
   });
 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
